@@ -42,7 +42,7 @@ namespace ft{
                 return(C.empty());
             }
 
-            size_type size() const(){
+            size_type size() const{
                 return (C.size());
             }
 

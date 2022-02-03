@@ -2,6 +2,7 @@
 #define VECTOR_HPP
 
 #include <iostream>
+#include <memory>
 #include <limits>
 
 namespace ft{
@@ -48,7 +49,7 @@ namespace ft{
 				_data = NULL;
 				while (first != last){
 					this->push_back(*first);
-					first++;
+					++first;
 				}
 			}
 
@@ -366,7 +367,7 @@ namespace ft{
 
 		template <class InputIterator>
 		void assign (InputIterator first, InputIterator last, typename std::enable_if<!std::numeric_limits<InputIterator>::is_specialized>::type * = 0){
-			int n = 0;
+			size_type n = 0;
 			InputIterator tmp = first;
 			while (tmp++ != last)
 				n++;
@@ -387,7 +388,7 @@ namespace ft{
 				_data = _alloc_t.allocate(n);
 				_capacity = n;
 			}
-			for (int i = 0; i < n; i++)
+			for (size_type i = 0; i < n; i++)
 				this->push_back(val);
 		}
 
@@ -400,40 +401,67 @@ namespace ft{
 
 		void pop_back(){
 			if (_size > 0){
-				_alloc_t.destroy(_data + (_size - 1));
+				// _alloc_t.destroy(_data + (_size - 1));
 				_size--;
 			}
 		}
 
 		iterator insert (iterator position, const value_type& val){
-			if (position == this->end()) {
-				this->push_back(val);
-				return iterator(_data + (_size - 1));
+			if (position < this->begin() || position > this->end())
+				throw(std::logic_error("vector"));  //????
+			diff_type start = position - this->begin();
+			if (_size == _capacity){
+				_capacity *= 2;
+				point new_ptr = _alloc_t.allocate(_capacity);
+				std::uninitialized_copy(begin(), position, iterator(new_ptr));
+				_alloc_t.constructor(new_ptr + start , val);
+				std::uninitialized_copy(position, end(), iterator(new_ptr + start + 1));
+				for (size_t i = 0; i < _size; i++)
+					_alloc_t.destroy(_data + i);
+				if(_size)
+					_alloc_t.deallocate(_data, _size);
+				_size++;
+				_data = new_ptr;
 			}
-			int len = 0;
-			iterator it_start = this->begin();
-			while (it_start++ != position) {
-				len++;
+			else {
+				for (size_type i = _size; i > static_cast<size_type>(start); i--){
+					_alloc_t.destroy(_data + i);
+					_alloc_t.construct(_data + i, *(_data + i - 1));
+				}
+				_alloc_t.destroy(&(*position));
+				_alloc_t.construct(&(*position), val);
+				_size++;
 			}
-			if (_size + 1 > _capacity)
-				this->capacity_realloc(_capacity == 0 ? 1 : _capacity * 2);
-			T tmp;
-			T tmp2 = val;
-			int i = len;
-			for (; i < this->size(); i++) {
-				tmp = _data[i];
-				_alloc_t.destroy(_data + i);
-				_alloc_t.construct(_data + i, tmp2);
-				tmp2 = tmp;
+			return (this->begin() + start);
 			}
-			_alloc_t.construct(_data + i, tmp2);
-			_size++;
-			return iterator(_data + len);
-		}
+			// if (position == this->end()) {
+			// 	this->push_back(val);
+			// 	return iterator(_data + (_size - 1));
+			// }
+			// size_t len = 0;
+			// iterator it_start = this->begin();
+			// while (it_start++ != position) {
+			// 	len++;
+			// }
+			// if (_size + 1 > _capacity)
+			// 	this->capacity_realloc(_capacity == 0 ? 1 : _capacity * 2);
+			// point tmp;
+			// point tmp2 = val;
+			// size_t i = len;
+			// for (; i < this->size(); i++) {
+			// 	tmp = _data[i];
+			// 	_alloc_t.destroy(_data + i);
+			// 	_alloc_t.construct(_data + i, tmp2);
+			// 	tmp2 = tmp;
+			// }
+			// _alloc_t.construct(_data + i, tmp2);
+			// _size++;
+			// return iterator(_data + len);
+		// }
 
 		void insert (iterator position, size_type n, const value_type& val){
 			if (position == this->end()) {
-				for (int i = 0; i < n; i++)
+				for (size_type i = 0; i < n; i++)
 					this->push_back(val);
 				return;
 			}
@@ -444,7 +472,7 @@ namespace ft{
 			}
 			if (_size + n > _capacity)
 				this->capacity_realloc(_capacity * 2 > n ? _capacity * 2 : n);
-			for (int i = 0; i < n; i++) {
+			for (size_type i = 0; i < n; i++) {
 				this->insert(iterator(_data + len + i),val);
 			}
 		}
@@ -485,7 +513,7 @@ namespace ft{
 				len++;
 			}
 			_alloc_t.destroy(_data + len);
-			for (int i = len; i < this->size(); i++) {
+			for (size_type i = len; i < this->size(); i++) {
 				_alloc_t.construct(_data + i, _data[i + 1]);
 				_alloc_t.destroy(_data + i + 1);
 			}
