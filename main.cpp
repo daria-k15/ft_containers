@@ -5,6 +5,6 @@
 #include <vector>
 
 int main(){
-    // vector_test();
-    stack_test();
+    vector_test();
+    // stack_test();
 }

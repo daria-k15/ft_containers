@@ -53,10 +53,11 @@ namespace ft{
 				}
 			}
 
-			vector(const vector &x){
+			vector(const vector &x){ //??????
 				_size = 0;
 				_capacity = 0;
-				_data = NULL;
+				// _data = NULL;
+				// _alloc_t = x._alloc_t;
 				*this = x;
 			}
 
@@ -64,19 +65,31 @@ namespace ft{
 				this->delete_vect();
 			}
 
-			vector &operator= (const vector &x){
+			vector& operator= (const vector &x){
 				if (*this == x){
 					return (*this);
 				}
-				this->delete_vect();
-				this->_alloc_t = x._alloc_t;
-				iterator it = x.begin();
-				iterator ite = x.end();
-				while (it != ite){
-					this->push_back(*ite);
-					it++;
+				for (size_type i = 0; i < _size; i++)
+					_alloc_t.destroy(_data + i);
+				this->_size = x._size;
+				if (_capacity < _size){
+					if (_capacity != 0)
+						_alloc_t.deallocate(_data, _capacity);
+					_capacity = _size;
+					_data = _alloc_t.allocate(_capacity);
 				}
+				for (size_type i = 0; i < _size; i++)
+					_alloc_t.construct(_data + i, x[i]);
 				return (*this);
+				// this->delete_vect();
+				// this->_alloc_t = x._alloc_t;
+				// iterator it = x.begin();
+				// iterator ite = x.end();
+				// while (it != ite){
+				// 	this->push_back(*ite);
+				// 	it++;
+				// }
+				// return (*this);
 			}
 
 			/*Iterators*/
@@ -277,7 +290,7 @@ namespace ft{
 			}
 
 			size_type max_size() const{
-				return (std::numeric_limits<size_type>::max() / sizeof(T));
+				return (_alloc_t.max_size());
 			}
 
 			void resize (size_type n, value_type val = value_type()){
@@ -407,33 +420,23 @@ namespace ft{
 		}
 
 		iterator insert (iterator position, const value_type& val){
-			if (position < this->begin() || position > this->end())
-				throw(std::logic_error("vector"));  //????
-			diff_type start = position - this->begin();
-			if (_size == _capacity){
-				_capacity *= 2;
-				point new_ptr = _alloc_t.allocate(_capacity);
-				std::uninitialized_copy(begin(), position, iterator(new_ptr));
-				_alloc_t.constructor(new_ptr + start , val);
-				std::uninitialized_copy(position, end(), iterator(new_ptr + start + 1));
-				for (size_t i = 0; i < _size; i++)
-					_alloc_t.destroy(_data + i);
-				if(_size)
-					_alloc_t.deallocate(_data, _size);
-				_size++;
-				_data = new_ptr;
+			size_type i = 0;
+			iterator it = begin();
+			while (it + i != position && i < _size){
+				i++;
 			}
-			else {
-				for (size_type i = _size; i > static_cast<size_type>(start); i--){
-					_alloc_t.destroy(_data + i);
-					_alloc_t.construct(_data + i, *(_data + i - 1));
-				}
-				_alloc_t.destroy(&(*position));
-				_alloc_t.construct(&(*position), val);
-				_size++;
+			if (_size + 1 > _capacity){
+				this->capacity_realloc(_capacity == 0 ? 1 : _capacity * 2);
 			}
-			return (this->begin() + start);
+			size_type len = _size + 1;
+			while (len > i){
+				_data[len] = _data[len - 1];
+				len--;
 			}
+			_data[i] = val;
+			_size++;
+			return (iterator(&_data[i]));
+		}
 			// if (position == this->end()) {
 			// 	this->push_back(val);
 			// 	return iterator(_data + (_size - 1));
@@ -460,6 +463,8 @@ namespace ft{
 		// }
 
 		void insert (iterator position, size_type n, const value_type& val){
+			if (n == 0)
+				return ;
 			if (position == this->end()) {
 				for (size_type i = 0; i < n; i++)
 					this->push_back(val);
@@ -538,26 +543,9 @@ namespace ft{
 		}
 
 		void swap (vector& x){
-			allocator_type tmp_alloc;
-			size_type tmp_size;
-			size_type tmp_capacity;
-			point tmp_data;
-
-			tmp_alloc = this->_alloc_t;
-			this->_alloc_t = x._alloc_t;
-			x._alloc_t = tmp_alloc;
-
-			tmp_size = this->_size;
-			this->_size = x._size;
-			x._size = tmp_size;
-
-			tmp_capacity = this->_capacity;
-			this->_capacity = x._capacity;
-			x._capacity = tmp_capacity;
-
-			tmp_data = this->_data;
-			this->_data = x._data;
-			x._data = tmp_data;
+			ft::swap(_data, other._data);
+			ft::swap(_size, other._size);
+			ft::swap(_capacity, other._capacity);
 		}
 
 		void clear(){
