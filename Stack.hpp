@@ -10,7 +10,6 @@ namespace ft{
         public:
             typedef T                                   value_type;
             typedef Container                           container_t;
-            // typedef typename Container::value_type      value_type;
             typedef typename Container::size_type	    size_type;
             typedef value_type&		ref;
             typedef value_type&	const_ref;
@@ -21,12 +20,13 @@ namespace ft{
         public:
             explicit stack(const Container &cont = Container()) : C(cont){}
 
-            stack(const stack &other) : C(other.C){}
+            // stack(const stack &other) : C(other.C){}
 
             ~stack(){}
 
             stack &operator=(const stack &other){
-                C = other.C;
+                if (*this != other)
+                    C = other.C;
                 return *this;
             }
 

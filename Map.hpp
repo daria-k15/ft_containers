@@ -5,12 +5,24 @@
 #include <iostream>
 
 namespace ft{
+	template <class Key, class T>
+		struct node{
+			std::pair<Key, T> pair;
+			node* parent;
+			node* left;
+			node* right;
+			bool end;
+		};
+};
+
+namespace ft{
     template <class Key, class T, class Compare=std::less<Key>, class Allocator = std::allocator<std::pair<const Key, T> > >
     class map{
         public:
             typedef Key                                         key_type;
             typedef T                                           mapped_type;
             typedef std::pair<const Key, T>                     value_type;
+			typedef node<Key, T>*							node;
             typedef Compare                                     key_compare;
             typedef Allocator                                   allocator_type;
             typedef typename allocator_type::reference          reference;
@@ -38,14 +50,14 @@ namespace ft{
                     }
             }       value_compare;
 
-			template <class Key, class T>
-			struct node{
-				std::pair<Key, T> pair;
-				node* parent;
-				node* left;
-				node* right;
-				bool end;
-			};
+			// template <class Key, class T>
+			// struct node{
+			// 	std::pair<Key, T> pair;
+			// 	node* parent;
+			// 	node* left;
+			// 	node* right;
+			// 	bool end;
+			// };
 
         private:
             node		_root;
@@ -73,14 +85,14 @@ namespace ft{
 
 			node insert_node(node node, key_type key, mapped_type val, bool end = false){
 				if (node->end){
-					if (n->left == NULL){
-						n->left = _new_node(key, val, node);
+					if (node->left == NULL){
+						node->left = _new_node(key, val, node);
 					}
 					return (node->left);
 				}
 				if (key < node->pair.first && !end){
 					if(node->left == NULL){
-						n->left = _new_node(key, val, node, end);
+						node->left = _new_node(key, val, node, end);
 						return (node->left);
 					}else{
 						return (insert_node(node->left, key, val));
@@ -103,7 +115,7 @@ namespace ft{
 					if (tmp = find_node(node->right, key))
 						return (tmp);
 				}
-				if (n->left){
+				if (node->left){
 					if (tmp = find_node(node->left, key))
 						return (tmp);
 				}
@@ -204,7 +216,7 @@ namespace ft{
                 return (std::numeric_limits<size_type>::max() / sizeof(node));
             }
 
-			mapped_type& operator[] const (const key_type& k){
+			mapped_type& operator[](const key_type& k){
 				iterator it = find(k);
 				if (it != end())
 					return it->second;
@@ -216,11 +228,10 @@ namespace ft{
 		private:
 			class iter{
 				protected:
-					node	_it;
+					node*	_it;
 
-				private:
-					node _successor(node it){
-						node next;
+					node _successor(node* it){
+						node* next;
 						if (ptr->right == NULL){
 							next = it;
 							while (next->parent && next->parent->right)
@@ -233,8 +244,8 @@ namespace ft{
 						return next;
 					}
 
-					node predecessor(node it){
-						node next;
+					node predecessor(node* it){
+						node* next;
 
 						if (it->left == NULL){
 							next = it;
@@ -284,7 +295,7 @@ namespace ft{
 			typedef class iterator : public iter{
 				public:
 					iterator() : iter(){}
-					iterator(node *it) : iter(it){}
+					iterator(node* it) : iter(it){}
 					iterator& operator=(const iterator& x){
 						if (*this == x)
 							return this;
@@ -340,12 +351,343 @@ namespace ft{
 					bool operator<=(const iterator& x){
 						return(_it <= x._it);
 					}
+			} iterator;
+
+			typedef class const_iterator : public iterator {
+				public:
+					const_iterator() : iterator(){}
+					explicit const_iterator(node it) : iterator(it){}
+					explicit const_iterator(const iterator& x) : iterator(x){}
+					virtual ~const_iterator(){}
+					const value_type& operator*(){
+						return (_it->pair);
+					}
+			}	const_iterator;
+
+			typedef class reverse_iterator : public iter{
+				public:
+					reverse_iterator() : iter(){}
+					reverse_iterator(const node* it) : iter(it){}
+					reverse_iterator& operator=(const reverse_iterator& x){
+						if (*this == x)
+							return *this;
+						_it = x._it;
+						return *this;
+					}
+
+					reverse_iterator(const reverse_iterator& x){
+						_it = x._it;
+					}
+					virtual ~reverse_iterator(){}
+					reverse_iterator& operator++(){
+						_it = predecessor(_it);
+						return *this;
+					}
+					reverse_iterator& operator--(){
+						_it = successor(_it);
+						return *this;
+					}
+					reverse_iterator operator++(int){
+						reverse_iterator tmp(*this);
+						this->operator++();
+						return tmp;
+					}
+					reverse_iterator operator--(int){
+						reverse_iterator tmp(*this);
+						this->operator--();
+						return tmp;
+					}
+
+					bool operator==(const reverse_iterator& other){
+							return (_it == other._it);
+						}
+
+					bool operator != (const reverse_iterator &other){
+						return (_it != other._it);
+					}
+
+					bool operator>(const reverse_iterator& x){
+						return (_it > x._it);
+					}
+
+					bool operator<(const reverse_iterator& x){
+						return (_it < x._it);
+					}
+
+					bool operator>=(const reverse_iterator& x){
+						return(_it >= x._it);
+					}
+
+					bool operator<=(const reverse_iterator& x){
+						return(_it <= x._it);
+					}
+			} reverse_iterator;
+
+			typedef class const_reverse_iterator : public reverse_iterator{
+				public:
+					const_reverse_iterator() : reverse_iterator(){}
+					const_reverse_iterator(node *it) : revrese_iterator(it){}
+					const_reverse_iterator(const const_reverse_iterator& x){
+						*this = x;
+					}
+					virtual ~const_reverse_iterator(){}
+					const_reverse_iterator& operator=(const const_reverse_iterator& x){
+						_it = x._it;
+						return *this;
+					}
+			}		const_reverse_iterator;
+		public:
+			iterator begin(){
+				node* node = _root;
+				if (node->left == NULL && node->right == NULL)
+					return end();
+				if (node->left == NULL && node->right != NULL){
+					node = node->right;
+				}
+				while(node->left)
+					node = node->left;
+				return (iterator(node));
+			}
+
+			const_iterator begin() const{
+				node* node = _root;
+				if (node->left == NULL && node->right == NULL)
+					return end();
+				if (node->left == NULL && node->right != NULL){
+					node = node->right;
+				}
+				while(node->left)
+					node = node->left;
+				return (const_iterator(node));
+			}
+
+			iterator end(){
+				return (iterator(_end));
+			}
+
+			const_iterator end() const{
+				return (const_iterator(_end));
+			}
+
+			reverse_iterator rbegin(){
+				iterator i = end();
+				i--;
+				return (reverse_iterator(i.node()));
+			}
+
+			const_reverse_iterator rbegin() const{
+				iterator i = end();
+				i--;
+				return (const_reverse_iterator(i.node()));
 			}
 			
+			reverse_iterator rend(){
+				return reverse_iterator(_root);
+			}
+
+			const_reverse_iterator rend() const{
+				return const_reverse_iterator(_root);
+			}	
+
+			std::pair<iterator, bool> insert(const value_type &value){
+				iterator tmp;
+
+				if ((tmp = find_node(value.first)) != end)
+					return (std::make_pair(tmp, false));
+				++_size;
+				return (std::make_pair(iterator(insert_node(_root, value.first, value.second))));
+			}
+
+			iterator insert(iterator pos, const value_type& value){
+				iterator tmp;
+
+				if ((tmp = find_node(value.first)) != end)
+					return tmp;
+				++_size;
+				return (iterator(insert_node(pos.node(), value.first, value.second)));
+			}
+
+			template <class InputIterator>
+			void insert(InputIterator first, InputIterator last){
+				while(first != last){
+					insert(*first);
+					++first;
+				}
+			};
+
+			void erase(iterator position){
+				delete_node(position.node());
+				--_size;
+			}
+
+			size_type erase(const key_type& value){
+				int i = 0;
+				iterator it;
+				while ((it = find_node(value)) != end()){
+					erase(it);
+					i++;
+				}
+				return (i);
+			}
+
+			void erase(iterator first, iterator last){
+				while (first != last)
+					erase(first++);
+			}
+
+			void swap(map& x){
+				ft::swap(_size, x._size);
+				ft::swap(_root, x._root);
+			}
+
+			void clear(){
+				erade(begin(), end());
+			}
+
+			key_compare key_comp() const{
+				return (comp);
+			}
+
+			value_compare value_comp() const{
+				return (this->value_compare);
+			}
+
+			iterator find(const key_type &value){
+				if (empty)
+					return(end());
+				node* tmp = find_node(_root, value);
+				if (tmp)
+					return (iterator(tmp));
+				return (end());
+			}
+
+			const_iterator find(const key_type &value) const{
+				if (empty)
+					return(end());
+				node* tmp = find_node(_root, value);
+				if (tmp)
+					return (const_iterator(tmp));
+				return (end());
+			}
+
+			size_type count(const key_type& value) const{
+				size_t i = 0;
+				const_iterator it = begin();
+				while (it != end()){
+					if (it->first == value)
+						++i;
+					++it;
+				}
+				return (i);
+			}
+
+			iterator lower_bound(const key_type &key){
+				iterator it = begin();
+				while (it != end()){
+					if (this->comp(it->first, key) <= 0)
+						return (it);
+					++it;
+				}
+				return (end());
+			}
+
+			const_iterator lower_bound(const key_type &key) const{
+				const_iterator it = begin();
+				while (it != end()){
+					if (this->comp(it->first, key) <= 0)
+						return (it);
+					++it;
+				}
+				return (end());
+			}
+
+			iterator upper_bound(const key_type key){
+				iterator it = begin();
+				while (it != end()){
+					if (it->first != key && this->comp(it->first, key) <= 0)
+						return (it);
+					++it;
+				}
+				return (end());
+			}
+
+			const_iterator upper_bound(const key_type key) const{
+				const_iterator it = begin();
+				while (it != end()){
+					if (it->first != key && this->comp(it->first, key) <= 0)
+						return (it);
+					++it;
+				}
+				return (end());
+			}
+
+			std::pair<const_iterator, const_iterator> equal_range(const key_type &key) const{
+				return (std::pair<const_iterator, const_iterator>(this->lower_bound(k), this->upper_bound(k)));
+			}
+
+			std::pair<iterator, iterator> equal_range(const key_type &key){
+				return (std::pair<iterator, iterator>(this->lower_bound(k), this->upper_bound(k)));
+			}
 
 
     };
-}
+
+	template <class Key, class T, class Compare, class Allocator>
+	void swap(ft::map<Key, T, Compare, Allocator>& x, ft::map<Key, T, Compare, Allocator>& y){
+		x.swap(y);
+	}
+
+	template <class Key, class T, class Compare, class Allocator>
+	bool operator==(const map<Key, T, Compare, Allocator> &x, const map<Key, T, Compare, Allocator> &y){
+		if (x.size() != y.size())
+			return false;
+		typename ft::map<Key, T, Compare, Allocator>::const_iterator it = x.begin();
+		typename ft::map<Key, T, Compare, Allocator>::const_iterator ite = y.begin();
+		while (it != x.end()){
+			if (*it != *ite)
+				return false;
+			++it;
+			++it2;
+		}
+		return true;
+	}
+
+	template <class Key, class T, class Compare, class Allocator>
+	bool operator!=(const map<Key, T, Compare, Allocator>&x, const map<Key, T, Compare, Allocator>&y){
+		return (x != y);
+	}
+
+	template <class Key, class T, class Compare, class Allocator>
+	bool operator>(const map<Key, T, Compare, Allocator>&x, const map<Key, T, Compare, Allocator>&y){
+		if (x.size() > y.size())
+			return true;
+		typename ft::map<Key, T, Compare, Allocator>::const_iterator it = x.begin();
+		typename ft::map<Key, T, Compare, Allocator>::const_iterator ite = y.begin();
+		while (it != x.end() && ite != y.end()){
+			if (*it > *ite)
+				return true;
+			++it;
+			++it2;
+		}
+		return false;
+	}
+
+	template <class Key, class T, class Compare, class Allocator>
+	bool operator<(const map<Key, T, Compare, Allocator>&x, const map<Key, T, Compare, Allocator>&y){
+		return (x < y);
+	}	
+
+	template <class Key, class T, class Compare, class Allocator>
+	bool operator<=(const map<Key, T, Compare, Allocator>&x, const map<Key, T, Compare, Allocator>&y){
+		return (x <= y);
+	}	
+
+	template <class Key, class T, class Compare, class Allocator>
+	bool operator>=(const map<Key, T, Compare, Allocator>&x, const map<Key, T, Compare, Allocator>&y){
+		return (x >= y);
+	};
+
+};
 
 
 
