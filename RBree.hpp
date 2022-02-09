@@ -6,6 +6,7 @@
 template <class Value, class Compare = std::less<Value>, class Allocator = std::allocator<Value> >
 class rbtree{
 	public:
+		Value value_type;
 		typedef Value value_type;
 		typedef Compare _compare;
 		typedef Allocator _alloc;
@@ -21,6 +22,6 @@ class rbtree{
 		typedef TreeIterator<const Value> const_iterator;
 		typedef ft::reverse_iterator<iterator> reverse_iterator;
 		typedef ft::reverse_iterator<const_iterator> const_reverce_iterator;
-}
+};
 
 #endif

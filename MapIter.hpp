@@ -1,47 +1,55 @@
 #ifndef MAPITER_HPP
 #define MAPITER_HPP
 
-template <class Value>
-struct Node{
-	public:
-		explicit Node(Value *val = 0) : value(val), parent(0), left(0), right(0), is_black(false), is_nil(false){}
+namespace ft{
+	template <class Value>
+	struct Node{
+		public:
+			Value *value;
+			Node* parent;
+			Node* left;
+			Node* right;
+			bool is_black;
+			bool is_nil;
 
-		Value *value;
-		Node* parent;
-		Node* left;
-		Node* right;
-		bool is_black;
-		bool is_nil;
-
-		Node(Node const& x){
-			this->is_black = x.is_black;
-			this->value = x.value;
-			this->parent = x.parent;
-			this->is_nil = x.is_nil;
-			this->right = x.right;
-			this->left = x.left;
-		};
-
-		Node&operator=(const Node& x){
-			if (*this != x){
+			explicit Node(Value *val = 0) : value(val), parent(0), left(0), right(0), is_black(false), is_nil(false){}
+			Node(Node const& x){
 				this->is_black = x.is_black;
 				this->value = x.value;
 				this->parent = x.parent;
 				this->is_nil = x.is_nil;
 				this->right = x.right;
 				this->left = x.left;
+			};
+
+			Node&operator=(const Node& x){
+				if (*this != x){
+					this->is_black = x.is_black;
+					this->value = x.value;
+					this->parent = x.parent;
+					this->is_nil = x.is_nil;
+					this->right = x.right;
+					this->left = x.left;
+				}
+				return *this;
 			}
-			return *this;
-		}
 
-	virtual ~Node(){}
-};
+		virtual ~Node(){}
+	};
 
-private:
+	template <class Value>
 	class TreeIterator{
+		public:
+            typedef Value                                       value_type;
+            typedef Value&										reference;
+			typedef Value*										pointer;
+            typedef const reference   							const_reference;
+            typedef const pointer					            const_pointer;
+            typedef std::ptrdiff_t                              diff_t;
+            typedef std::size_t                                 size_type;
+			typedef Node<typedef remove_const<Value>::type>*	node_pointer;
 		protected:
 			node_pointer _ptr;
-
 			node_pointer find_min(node_pointer point) const{
 				while(point->left != NULL && !point->left->is_nil)
 					point = point->left;
@@ -54,54 +62,225 @@ private:
 				return (point);
 			}
 		public:
-			TreeIterator(){
-				_ptr = NULL;
+			TreeIterator(){}
+			TreeIterator(node_pointer* ptr) : _root(static_cast<node_pointer>(ptr)){}
+			TreeIterator(const TreeIterator<typename remove_const<Value>::type>& other){
+				*this = other;
 			}
-			TreeIterator(node_pointer ptr){
-				_ptr = ptr;
-			}
-			~TreeIterator(){}
-
-			reference& operator*() const{
-				return *(this->_ptr);
-			}
-
-			reference*operator->() const{
-				return(this->_ptr);
-			}
-	};
-
-public:
-	typedef class iterator : public TreeIterator{
-		public:
-			iterator() : TreeIterator(){}
-			explicit iterator(node_pointer ptr) : TreeIterator(ptr){}
-			iterator& operator=(const iterator& x){
-				if (*this == x)
-					return (*this);
-				this->_ptr = x._ptr;
+			TreeIterator& operator=(const TreeIterator<typename remove_const<Value>::type>& other){
+				if (*this != other)
+					this->_root = other._root;
 				return (*this);
 			}
 
-			iterator(const iterator& x){
-				this->_ptr = x._ptr;
+			~TreeIterator(){}
+
+			reference& operator*() const{
+				return *(_root->data);
 			}
 
-			virtual ~iterator(){}
+			pointer*operator->() const{
+				return(_root->data);
+			}
 
-			iterator& operator++(){
-				if (_ptr->right && !_ptr->right->is_nil)
-					_ptr = find_min(_ptr->right);
+			TreeIterator& operator++(){
+				if (_root->right != NULL && !_root->right->isNil)
+					_root = find_min(_root->right);
 				else{
-					node_pointer x = _ptr->parent;
-					while (x != NULL && _ptr==x->right){
-						_ptr = x;
-						x = x->parent;
+					node_pointer tmp = _root->parent;
+					while (tmp && _root == tmp->right){
+						_root = tmp;
+						tmp = tmp->parent;
 					}
-					_ptr = x;
+					_root = tmp;
 				}
+				return (*this);
+			}
+
+		TreeIterator& operator--(){
+			if (_root->left != NULL && !_root->left->isNil)
+				_root = find_max(_root->left);
+			else{
+				node_pointer tmp = _root->parent;
+				while (tmp && _root == tmp->left){
+					_root = tmp;
+					tmp = tmp->parent;
+				}
+				_root = tmp;
+			}
+			return (*this);
+		}
+
+		TreeIterator operator++(int){
+			TreeIterator<value_type> tmp(*this);
+			*this = operator++();
+			return tmp;
+		}
+
+		TreeIterator operator--(int){
+			TreeIterator<value_type> tmp(*this);
+			*this = operator--();
+			return tmp;
+		}
+
+		template<class T>
+		bool operator==(const TreeIterator<T>& other){
+			return (_root == other._root);
+		}
+		template<class T>
+		bool operator!=(const TreeIterator<T>& other){
+			return (_root != other._root);
+		}
+	};
+
+	template<class Value>
+	class ConstTreeIterator : public TreeIterator<Val> {
+		public:
+			typedef typename TreeIterator<Value>::const_pointer		const_pointer;
+			typedef typename TreeIterator<Value>::const_reference	const_reference;
+			typedef std::size_t										size_type;
+			typedef std::ptrdiff_t									diff_type;
+			typedef typename TreeIterator<Val>::node_pointer		node_pointer;
+
+			ConstTreeIterator() : TreeIterator<Val>(){}
+			ConstTreeIterator(node_pointer ptr) : TreeIterator<Val>(ptr){}
+			ConstTreeIterator(const TreeIterator<typename remove_const<Val>::type>& other){
+				*this = other;
+			}
+			ConstTreeOperator&operator=(const ConstTreeIterator<typename remove_const<Val>::type>&other){
+				if (*this != other)
+					this->_root = other._root;
 				return *this;
 			}
-	}
+			virtual ~ConstTreeIterator(){}
+			const_pointer operator->() const{
+				return this->root->_data;
+			}
+			const_reference operator*()const{
+				return(*(this->_root->_data));
+			}
+			template<class T>
+			bool operator==(const ConstTreeIterator<T>& other){
+				return (this->_root == other._root);
+			}
+			template<class T>
+			bool operator!=(const ConstTreeIterator<T>& other){
+				return (this->_root != other._root);
+			}
+	};
+
+	template<class Value>
+	class ReverseIterator : public TreeIterator<Val> {
+		public:
+			typedef typename TreeIterator<Value>::const_pointer		const_pointer;
+			typedef typename TreeIterator<Value>::const_reference	const_reference;
+			typedef std::size_t										size_type;
+			typedef std::ptrdiff_t									diff_type;
+			typedef typename TreeIterator<Val>::node_pointer		node_pointer;
+
+			ReverseIterator() : TreeIterator<Val>(){}
+			ReverseIterator(node_pointer ptr) : TreeIterator<Val>(ptr){}
+			ReverseIterator(const TreeIterator<typename remove_const<Val>::type>& other){
+				*this = other;
+			}
+			ReverseOperator&operator=(const ConstTreeIterator<typename remove_const<Val>::type>&other){
+				if (*this != other)
+					this->_root = other._root;
+				return *this;
+			}
+			virtual ~ReverseIterator(){}
+
+			ReverseIterator& operator--(){
+				if (_root->right != NULL && !_root->right->isNil)
+					_root = find_min(_root->right);
+				else{
+					node_pointer tmp = _root->parent;
+					while (tmp && _root == tmp->right){
+						_root = tmp;
+						tmp = tmp->parent;
+					}
+					_root = tmp;
+				}
+				return (*this);
+			}
+
+			ReverseIterator& operator++(){
+				if (_root->left != NULL && !_root->left->isNil)
+					_root = find_max(_root->left);
+				else{
+					node_pointer tmp = _root->parent;
+					while (tmp && _root == tmp->left){
+						_root = tmp;
+						tmp = tmp->parent;
+					}
+					_root = tmp;
+				}
+				return (*this);
+			}
+
+			ReverseIterator operator++(int){
+				TreeIterator<value_type> tmp(*this);
+				*this = operator++();
+				return tmp;
+			}
+
+			ReverseIterator operator--(int){
+				TreeIterator<value_type> tmp(*this);
+				*this = operator--();
+				return tmp;
+			}
+
+			template<class T>
+			bool operator==(const ReverseIterator<T>& other){
+				return (_root == other._root);
+			}
+			template<class T>
+			bool operator!=(const ReverseIterator<T>& other){
+				return (_root != other._root);
+			}
+		};
+
+	template<class Value>
+	class ConstReverseIterator : public ReverseIterator<Val> {
+		public:
+			typedef typename TreeIterator<Value>::const_pointer		const_pointer;
+			typedef typename TreeIterator<Value>::const_reference	const_reference;
+			typedef std::size_t										size_type;
+			typedef std::ptrdiff_t									diff_type;
+			typedef typename TreeIterator<Val>::node_pointer		node_pointer;
+
+			ConstReverseIterator() : ReverseIterator<Val>(){}
+			ConstReverseIterator(node_pointer ptr) : ReverseIterator<Val>(ptr){}
+			ConstReverseIterator(const ConstReverseIterator<typename remove_const<Val>::type>& other){
+				*this = other;
+			}
+			ConstReverseIterator&operator=(const ConstReverseIterator<typename remove_const<Val>::type>&other){
+				if (*this != other)
+					this->_root = other._root;
+				return *this;
+			}
+			virtual ~ConstReverseIterator(){}
+
+			const_reference& operator*() const{
+				return *(_root->data);
+			}
+
+			const_pointer*operator->() const{
+				return(_root->data);
+			}
+
+			template<class T>
+			bool operator==(const ConstReverseIterator<T>& other){
+				return (_root == other._root);
+			}
+			template<class T>
+			bool operator!=(const ConstReverseIterator<T>& other){
+				return (_root != other._root);
+			}
+		};
+
+
+
+};
 
 #endif
