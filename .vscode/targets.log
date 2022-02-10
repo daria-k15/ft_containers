@@ -7,7 +7,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 
 # This program built for i386-apple-darwin11.3.0
 
-# Make data base, printed on Wed Feb  9 18:39:48 2022
+# Make data base, printed on Thu Feb 10 15:54:29 2022
 
 # Variables
 
@@ -36,11 +36,11 @@ MAKEFILE_LIST :=
 # environment
 VSCODE_VERBOSE_LOGGING = true
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /var/folders/zz/zyxvpxvq6csfxvn_n0001wjc000g4b/T/vscode-ipc-7e4daec1-5fbe-413d-99b7-6674317ad304.sock
+VSCODE_IPC_HOOK_EXTHOST = /var/folders/zz/zyxvpxvq6csfxvn_n0001wjc000g4b/T/vscode-ipc-ba0ba328-6ff7-4f58-80b0-d8cc5ad52e86.sock
 # environment
 VSCODE_CWD = /
 # environment
-Apple_PubSub_Socket_Render = /private/tmp/com.apple.launchd.TfT6J3syNw/Render
+Apple_PubSub_Socket_Render = /private/tmp/com.apple.launchd.yK102Tq6ze/Render
 # environment
 PATH = /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/munki:/opt/X11/bin:/Applications/Visual Studio Code.app/Contents/Resources/app/bin:/Applications/Visual Studio Code.app/Contents/Resources/app/bin
 # environment
@@ -52,11 +52,11 @@ ELECTRON_RUN_AS_NODE = 1
 # default
 .FEATURES := target-specific order-only second-expansion else-if archives jobserver check-symlink
 # environment
-SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.nxPjbioWrM/Listeners
+SSH_AUTH_SOCK = /private/tmp/com.apple.launchd.hngoEuHhqD/Listeners
 # automatic
 %F = $(notdir $%)
 # environment
-DISPLAY = /private/tmp/com.apple.launchd.VZ8jTDEcHB/org.xquartz:0
+DISPLAY = /private/tmp/com.apple.launchd.9VpZjcW2XJ/org.xquartz:0
 # environment
 VSCODE_PIPE_LOGGING = true
 # environment
@@ -134,7 +134,7 @@ PAGER = less
 # environment
 LC_ALL = C
 # environment
-SECURITYSESSIONID = 186d2
+SECURITYSESSIONID = 186ce
 # automatic
 ^F = $(notdir $^)
 # default
@@ -146,7 +146,7 @@ MAKELEVEL := 0
 # environment
 LANG = C
 # environment
-VSCODE_PID = 9498
+VSCODE_PID = 32870
 # variable set hash-table stats:
 # Load=68/1024=7%, Rehash=0, Collisions=1/89=1%
 
@@ -156,7 +156,7 @@ VSCODE_PID = 9498
 
 # Directories
 
-# . (device 16777232, inode 2238939): 16 files, no impossibilities.
+# . (device 16777227, inode 2238939): 16 files, no impossibilities.
 
 # 16 files, no impossibilities in 1 directories.
 
@@ -230,7 +230,7 @@ GNUmakefile:
 # strcache size: total = 0 / max = 0 / min = 4096 / avg = 0
 # strcache free: total = 0 / max = 0 / min = 4096 / avg = 0
 
-# Finished Make data base on Wed Feb  9 18:39:48 2022
+# Finished Make data base on Thu Feb 10 15:54:29 2022
 
  
 make: *** No rule to make target `all'.  Stop.

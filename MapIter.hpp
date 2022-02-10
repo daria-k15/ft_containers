@@ -278,9 +278,6 @@ namespace ft{
 				return (_root != other._root);
 			}
 		};
-
-
-
 };
 
 #endif
