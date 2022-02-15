@@ -1,1 +1,58 @@
-
+In file included from ../map_tests/operator >.cpp:2:
+In file included from ../map_tests/__service.ipp:3:
+../map_tests/../../../Map.hpp:167:69: error: 'this' argument to member function 'begin' has type 'const ft::map<int, int, less<int>, allocator<pair<const int, int> > >', but function is not marked const
+                typename ft::map<Key, T, Compare, Allocator>::const_iterator it = x.begin();
+                                                                                  ^
+../map_tests/operator >.cpp:19:27: note: in instantiation of function template specialization 'ft::operator><int, int, std::__1::less<int>, std::__1::allocator<ft::pair<const int, int> > >' requested here
+        result2.push_back(mt.mp1 > mt.mp1); result2.push_back(mt.mp3 > mt.mp3); result2.push_back(mt.mp5 > mt.mp9);
+                                 ^
+../map_tests/../../../Map.hpp:72:13: note: 'begin' declared here
+                        iterator begin(){return _tree.begin();}
+                                 ^
+../map_tests/../../../Map.hpp:168:70: error: 'this' argument to member function 'begin' has type 'const ft::map<int, int, less<int>, allocator<pair<const int, int> > >', but function is not marked const
+                typename ft::map<Key, T, Compare, Allocator>::const_iterator ite = y.begin();
+                                                                                   ^
+../map_tests/../../../Map.hpp:72:13: note: 'begin' declared here
+                        iterator begin(){return _tree.begin();}
+                                 ^
+../map_tests/../../../Map.hpp:167:69: error: 'this' argument to member function 'begin' has type 'const ft::map<basic_string<char>, basic_string<char>, less<basic_string<char> >, allocator<pair<const basic_string<char>, basic_string<char> > > >', but function is not marked const
+                typename ft::map<Key, T, Compare, Allocator>::const_iterator it = x.begin();
+                                                                                  ^
+../map_tests/operator >.cpp:19:99: note: in instantiation of function template specialization 'ft::operator><std::__1::basic_string<char>, std::__1::basic_string<char>, std::__1::less<std::__1::basic_string<char> >, std::__1::allocator<ft::pair<const std::__1::basic_string<char>, std::__1::basic_string<char> > > >' requested here
+        result2.push_back(mt.mp1 > mt.mp1); result2.push_back(mt.mp3 > mt.mp3); result2.push_back(mt.mp5 > mt.mp9);
+                                                                                                         ^
+../map_tests/../../../Map.hpp:72:13: note: 'begin' declared here
+                        iterator begin(){return _tree.begin();}
+                                 ^
+../map_tests/../../../Map.hpp:168:70: error: 'this' argument to member function 'begin' has type 'const ft::map<basic_string<char>, basic_string<char>, less<basic_string<char> >, allocator<pair<const basic_string<char>, basic_string<char> > > >', but function is not marked const
+                typename ft::map<Key, T, Compare, Allocator>::const_iterator ite = y.begin();
+                                                                                   ^
+../map_tests/../../../Map.hpp:72:13: note: 'begin' declared here
+                        iterator begin(){return _tree.begin();}
+                                 ^
+4 errors generated.
+rs generated.
+45: error: no member named 'isNil' in 'ft::Node<ft::pair<const int, int> >'
+                        if (_root->left != NULL && !_root->left->isNil)
+                                                    ~~~~~~~~~~~  ^
+../map_tests/upper_bound().cpp:83:18: note: in instantiation of member function 'ft::TreeIterator<ft::pair<const int, int> >::operator--' requested here
+    v.push_back((--mp.upper_bound(0))->first);
+                 ^
+../map_tests/upper_bound().cpp:92:73: note: in instantiation of function template specialization 'upper_bound_test<int, int>' requested here
+    exit(run_map_unit_test<int, int>("upper_bound()", upper_bound_test, upper_bound_test));
+                                                                        ^
+3 errors generated.
+                                                   ^
+../map_tests/../../../Iter.hpp:20:17: note: must qualify identifier to find this declaration in dependent base class
+                        node_pointer find_min(node_pointer point) const{
+                                     ^
+../map_tests/../../../Iter.hpp:176:58: error: no member named 'isNil' in 'ft::Node<ft::pair<const int, int> >'
+                                if (this->_root->left != NULL && !this->_root->left->isNil)
+                                                                  ~~~~~~~~~~~~~~~~~  ^
+../map_tests/reverse iterators.cpp:57:18: note: in instantiation of member function 'ft::ReverseIterator<ft::pair<const int, int> >::operator++' requested here
+    v.push_back((++rit2)->first);
+                 ^
+../map_tests/reverse iterators.cpp:65:87: note: in instantiation of function template specialization 'reverse_iterators_test_ft<int, int>' requested here
+    exit(run_map_unit_test<int, int>("reverse iterators", reverse_iterators_test_std, reverse_iterators_test_ft));
+                                                                                      ^
+5 errors generated.

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <limits>
+#include "utils.hpp"
 
 namespace ft{
     template <class T, class Allocator = std::allocator<T> >
@@ -42,7 +43,7 @@ namespace ft{
             }
 
             template <class InputIterator>
-			vector (InputIterator first, InputIterator last, const allocator_type &alloc = allocator_type(), typename std::enable_if<!std::numeric_limits<InputIterator>::is_specialized>::type * = 0){
+			vector (InputIterator first, InputIterator last, const allocator_type &alloc = allocator_type(), typename enable_if<!std::numeric_limits<InputIterator>::is_specialized>::type * = 0){
 				_alloc = alloc;
 				_size = 0;
 				_capacity = 20;
@@ -370,7 +371,7 @@ namespace ft{
         //		Modifiers
 
 		template <class InputIterator>
-		void assign (InputIterator first, InputIterator last, typename std::enable_if<!std::numeric_limits<InputIterator>::is_specialized>::type * = 0){
+		void assign (InputIterator first, InputIterator last, typename enable_if<!std::numeric_limits<InputIterator>::is_specialized>::type * = 0){
 			size_type n = 0;
 			InputIterator tmp = first;
 			while (tmp++ != last)
@@ -461,7 +462,7 @@ namespace ft{
 		}
 
 		template <class InputIterator>
-		void insert (iterator position, InputIterator first, InputIterator last, typename std::enable_if<!std::numeric_limits<InputIterator>::is_specialized>::type * = 0){
+		void insert (iterator position, InputIterator first, InputIterator last, typename enable_if<!std::numeric_limits<InputIterator>::is_specialized>::type * = 0){
 
 			size_type len = 0;
 			iterator it_start = this->begin();

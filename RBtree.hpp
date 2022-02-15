@@ -2,6 +2,8 @@
 #define RBTREE_HPP
 
 #include <memory>
+#include <functional>
+#include <iostream>
 #include "Iter.hpp"
 #include "utils.hpp"
 
@@ -11,22 +13,22 @@ namespace ft{
 		public:
 			typedef Value																value_type;
 			typedef Compare 															value_compare;
-			typedef Allocator 															alloc_type;
-			typedef typename alloc_type::template rebind<ft::Node<value_type> >::other	node_alloc;
+			typedef Allocator 															allocator_type;
+			typedef typename allocator_type::template rebind<ft::Node<value_type> >::other		node_alloc;
 			typedef typename node_alloc::pointer										node_pointer;
-			typedef typename alloc_type::reference 										reference;
-			typedef typename alloc_type::const_reference 								const_reference;
-			typedef typename alloc_type::pointer 										pointer;
-			typedef typename alloc_type::const_pointer 									const_pointer;
+			typedef typename allocator_type::reference 										reference;
+			typedef typename allocator_type::const_reference 								const_reference;
+			typedef typename allocator_type::pointer 										pointer;
+			typedef typename allocator_type::const_pointer 									const_pointer;
 			typedef std::ptrdiff_t 														diff_type;
 			typedef std::size_t 														size_type;
 			typedef ft::TreeIterator<Value> 											iterator;
-			typedef ft::ConstTreeIterator<const Value> 									const_iterator;
-			typedef ft::ReverseIterator<iterator> 										reverse_iterator;
-			typedef ft::ConstReverseIterator<const_iterator> 							const_reverce_iterator;
+			typedef ft::ConstTreeIterator<Value> 									const_iterator;
+			typedef ft::ReverseIterator<Value> 										reverse_iterator;
+			typedef ft::ConstReverseIterator<Value> 							const_reverse_iterator;
 
 		private:
-			alloc_type		_alloc;
+			allocator_type		_alloc;
 			node_alloc		_node_alloc;
 			value_compare	_compare;
 			node_pointer	_nil;
@@ -51,12 +53,12 @@ namespace ft{
 			}
 
 			void init_head(){
-				_nil = node_alloc.allocate(1);
-				node_alloc.construct(_nil, Node<value_type>());
+				_nil = _node_alloc.allocate(1);
+				_node_alloc.construct(_nil, Node<value_type>());
 				_nil->is_black = true;
 				_nil->is_nil = true;
-				_head = node_alloc.allocate(1);
-				node_alloc.construct(_head, Node<value_type>());
+				_head = _node_alloc.allocate(1);
+				_node_alloc.construct(_head, Node<value_type>());
 				_head->value = _alloc.allocate(1);
 				_alloc.construct(_head->value, value_type());
 				_head->is_black = true;
@@ -73,7 +75,7 @@ namespace ft{
 			void clearNode(node_pointer node){
 				_alloc.destroy(node->value);
 				_alloc.deallocate(node->value, 1);
-				node_alloc.deallocate(node, 1);
+				_node_alloc.deallocate(node, 1);
 			}
 
 			void rotate_right(node_pointer node){
@@ -109,22 +111,22 @@ namespace ft{
 				node->parent = tmp;
 			}
 
-			node_pointer insert(node_pointer newNode){
-				if (_root == _head)
-					_root = newNode;
-				else
-					insert_to_node(_root, newNode);
-				return (newNode);
-			}
+			// node_pointer _insert(node_pointer newNode){
+			// 	if (_root == _head)
+			// 		_root = newNode;
+			// 	else
+			// 		insert_to_node(_root, newNode);
+			// 	return (newNode);
+			// }
 
-			node_pointer insert_to_node(node_pointet root, node_pointet newNode){
+			node_pointer insert_to_node(node_pointer root, node_pointer newNode){
 				if (_compare(*newNode->value, *root->value)){
 					if (!is_nil(root->left))
-						return(insert_to_node(root->left));
+						return(insert_to_node(root->left, newNode));
 					root->left = newNode;
 				} else {
 					if (!is_nil(root->right))
-						return insert_to_node(root->right);
+						return insert_to_node(root->right, newNode);
 					root->right = newNode;
 				}
 				newNode->parent = root;
@@ -145,7 +147,7 @@ namespace ft{
 					node_pointer gparent = node->parent->parent;
 					while (node != _root && !node->parent->is_black){
 						if (node->parent == gparent->left){
-							node_pointer uncle = node_pointer gparent->right;
+							node_pointer uncle = gparent->right;
 							if (!uncle->is_black){
 								node->parent->is_black = true;
 								uncle->is_black = true;
@@ -240,7 +242,7 @@ namespace ft{
 
 			node_pointer copyNode(node_pointer node){
 				node_pointer res = _node_alloc.allocate(1);
-				_node_alloc.construct(res,  Node<Value>());
+				_node_alloc.construct(res,  ft::Node<Value>());
 				res->is_black = node->is_black;
 				res->is_nil = node->is_nil;
 				if (node->value){
@@ -264,19 +266,19 @@ namespace ft{
 					node->right = _head;
 					_head->parent = node;
 				} else {
-					node->right = copyNode(pther->right);
+					node->right = copyNode(other->right);
 					node->right->parent = node;
 					copyChild(node->right, other->right);
 				}
 			}
 
-			node_pointer find(const_reference value, node_pointer node) const{
+			node_pointer search(const_reference value, node_pointer node) const{
 				if (!node || is_nil(node))
 					return NULL;
-				if (_compare(value, *(node->data)))
-					return find(value, node->left);
-				if (_compare(*(node->data), value))
-					return find(value, node->right);
+				if (_compare(value, *(node->value)))
+					return search(value, node->left);
+				if (_compare(*(node->value), value))
+					return search(value, node->right);
 				return node;
 			}
 
@@ -291,27 +293,37 @@ namespace ft{
 				node->parent = where->parent;
 			}
 
+			iterator find(const value_type& value){
+				node_pointer node = search(value, _root);
+				return (node == NULL ? end() : iterator(node));
+			}
+
+			const_iterator find(const value_type& value) const{
+				node_pointer node = search(value, _root);
+				return (node == NULL ? end() : const_iterator(node));
+			}
+
 
 		public:
-			rbtree() : _alloc(alloc_type()), _node_alloc(node_alloc()), _compare(value_compare()){
+			rbtree() : _alloc(allocator_type()), _node_alloc(node_alloc()), _compare(value_compare()){
 				init_head();
 				_root = _head;
 				_size = 0;
 			}
 
-			explicit rbtree(const value_compare & comp = value_compare(), const alloc_type & _alloc = alloc_type()) : 
-				_alloc(alloc), node_alloc(_node_alloc()), _compare(comp){
+			explicit rbtree(const value_compare & comp = value_compare(), const allocator_type & alloc = allocator_type()) : 
+				_alloc(alloc), _compare(comp), _node_alloc(node_alloc()){
 				_size = 0;
 				init_head();
 				_root = _head;
 			}
 
-			rbtree(rbtree const &x){
+			rbtree(const rbtree &x) : _compare(x._compare){
 				*this = x;
 			}
 
 			rbtree&operator=(rbtree const &x){
-				if (*this != x){
+				if (this != &x){
 					this->_node_alloc = x._node_alloc;
 					this->_alloc = x._alloc;
 					this->_compare = x._compare;
@@ -322,7 +334,7 @@ namespace ft{
 					if (x._size == 0)
 						this->_root = this->_head;
 					else{
-						this->_root == copyNode(x._root);
+						this->_root = copyNode(x._root);
 						copyChild(this->_root, x._root);
 					}
 					this->_size = x._size;
@@ -337,8 +349,8 @@ namespace ft{
 			}
 
 			template<class InputIt>
-			rbtree(InputIt first, InputIt last, const value_compare& comp = value_compare(), const alloc_type& alloc = alloc_type(),
-			 typename enable_if<!std::numeric_limits<InputIt>::is_specialized>::type *= 0) : _alloc(alloc), node_alloc(_node_alloc(), value_compare(_compare)){
+			rbtree(InputIt first, InputIt last, const value_compare& comp = value_compare(), const allocator_type& alloc = allocator_type(),
+			typename ft::enable_if<!std::numeric_limits<InputIt>::is_specialized>::type * = 0) : _alloc(alloc), _node_alloc(node_alloc()), _compare(comp){
 				 init_head();
 				 _root = _head;
 				 _size = 0;
@@ -349,13 +361,13 @@ namespace ft{
 			const_iterator end() const{return (const_iterator(_head));}
 
 			iterator begin(){return iterator(_size ? iterator(tree_min(_root)) : _head);}
-			const_iterator begin() {return const_iterator(_size ? const_iterator(tree_min(_root)) : _head);}
+			const_iterator begin() const {return const_iterator(_size ? const_iterator(tree_min(_root)) : _head);}
 	
 			reverse_iterator rbegin() {return reverse_iterator(end());}
-			const_reverce_iterator rbegin() {return const_reverce_iterator(end());}
+			const_reverse_iterator rbegin() const {return const_reverce_iterator(end());}
 
 			reverse_iterator rend() {return reverse_iterator(begin());}
-			const_reverce_iterator rend() {return const_reverce_iterator(begin());}
+			const_reverse_iterator rend() const {return const_reverce_iterator(begin());}
 
 			bool empty() const{ return (_size == 0);}
 			size_type size() const {return _size;}
@@ -369,33 +381,34 @@ namespace ft{
 			}
 
 			ft::pair<iterator, bool> insert(const_reference val){
-				iterator it = find(val);
+				iterator it = search(val, _root);
 				if (it != end())
-					return ft::pair<iterator, bool>(iterator(it, false));
+					return ft::pair<iterator, bool>(it, false);
 				node_pointer node = _node_alloc.allocate(1);
 				pointer data = _alloc.allocate(1);
 				_alloc.construct(data, val);
-				_node_alloc.construct(node, node<value_type>(data));
+				_node_alloc.construct(node, ft::Node<value_type>(data));
 				node->left = node->right = _nil;
 				insert_to_tree(node, _root);
-				ft::pair<iterator, bool> res(iterator(noode), true);
+				ft::pair<iterator, bool> res(iterator(node), true);
 				insertFixUp(node);
 				node = tree_max(_root);
 				node->right = _head;
 				_head->parent = node;
-				++_size;
+				_size++;
+				std::cout << _size << std::endl;
 				return res;
 			}
 
-			iterator insert(iterator pos, const value_type &value){
-				node_pointer res = find(value, _root);
+			iterator insert(iterator pos, const_reference value){
+				node_pointer res = search(value, _root);
 				if (res)
 					return iterator(res);
-				res = node_alloc.allocate(1);
+				res = _node_alloc.allocate(1);
 				pointer point = _alloc.allocate(1);
 				_alloc.construct(point, value);
-				_node_alloc.construct(res, Node<value_type>(point));
-				node->left = node->right = _nil;
+				_node_alloc.construct(res, ft::Node<value_type>(point));
+				res->left = res->right = _nil;
 				if (pos == begin()){
 					if (_compare(value, *pos))
 						insert_to_tree(res, tree_min(_root));
@@ -417,7 +430,7 @@ namespace ft{
 			}
 
 			template<class InputIt>
-			void insert(InputIt first, InputIt last, typename enable_if<!std::numeric_limits<InputIt>::is_specialized>::type * = 0){
+			void insert(InputIt first, InputIt last, typename ft::enable_if<!std::numeric_limits<InputIt>::is_specialized>::type * = 0){
 				for(; first != last; first++){
 					insert(*first);
 				}
@@ -449,7 +462,7 @@ namespace ft{
 					node->is_black = x->is_black;
 				}
 				clearNode(del);
-				if(is_black){
+				if(isBlack){
 					eraseFixUp(tmp);
 				}
 				_nil->parent = NULL;
@@ -464,7 +477,7 @@ namespace ft{
 			}
 
 			size_type erase(const_reference value){
-				node_pointer res = find(vlaue, _root);
+				node_pointer res = search(value, _root);
 				if (res)
 					erase(iterator(res));
 				return res != NULL;
@@ -477,26 +490,72 @@ namespace ft{
 				}
 			}
 
-			value_compare value_compare() const { return _compare; }
+			value_compare value_comp() const { return _compare; }
 
-			alloc_type ger_allocator() const{return _alloc;}
+			allocator_type get_allocator() const{return _alloc;}
 
 			void swap(rbtree &other){
 				std::swap(_alloc, other._alloc);
-				std::swap(node_alloc, other._node_alloc);
+				std::swap(_node_alloc, other._node_alloc);
 				std::swap(_compare, other._compare);
 				std::swap(_root, other._root);
 				std::swap(_head, other._head);
 				std::swap(_nil, other._nil);
 				std::swap(_size, other._size);
 			}
+
+			size_type count(const value_type& value) const{return(find(value) != end());}
+
+			// iterator lower_bound(const value_type &val){
+			// 	for (iterator it == begin(); it < end(); ++it){
+			// 		if(!_compare(*it, val))
+			// 			return first;
+			// 	}
+			// 	return end();
+			// }
+
+			// const_iterator lower_bound(const value_type &val)const{
+			// 	for(const_iterator it = begin(); it < end(); ++it){
+			// 		if (!_compare(*it, val))
+			// 			return it;
+			// 	}
+			// 	return it;
+			// }
+
+			// iterator upper_bound(const value_type &val){
+			// 	for (iterator it = begin(); it < end(); ++it){
+			// 		if (_compare(*it, val))
+			// 			return it;
+			// 	}
+			// 	return it;
+			// }
+
+			// const_iterator upper_bound(const value_type &val) const{
+			// 	for (const_iterator it = begin(); it < end(); ++it){
+			// 		if (_compare(*it, val))
+			// 			return it;
+			// 	}
+			// 	return it;
+			// }
+
+			// pair<iterator, iterator> equal_range(const value_type &val){
+			// 	return make_pair(lower_bound(val), upper_bound(val));
+			// }
+
+			// pair<const_iterator, const_iterator>equal_range(const value_type &val){
+			// 	return make_pair(lower_bound(val), upper_bound(val));
+			// }
+
+			
+
+
 	};
 
 };
 
-namespace std::{
+namespace std{
 	template<class T, class Compare, class Allocator>
-	void swap(ft::rbtree<T, Compare, Allocator> &x, ft::rbtree<T, Compare, Allocator> &y){
+	void swap(const ft::rbtree<T, Compare, Allocator> &x, const ft::rbtree<T, Compare, Allocator> &y){
 		x.swap(y);
 	}
 }
