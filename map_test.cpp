@@ -1,8 +1,7 @@
-#include "Map.hpp"
-#include <map>
 #include "test.hpp"
 #include "utils.hpp"
-
+#include <map>
+#include "Map.hpp"
 template <class Key, class T>
 void print_std_map(std::map<Key, T> & map){
 	typename std::map<Key, T>::const_iterator it = map.begin();
@@ -18,7 +17,7 @@ void print_std_map(std::map<Key, T> & map){
 template <class Key, class T>
 void print_ft_map(ft::map<Key, T> & map){
 	typename ft::map<Key, T>::const_iterator it = map.begin();
-	std::cout<<"check"<<std::endl;
+	// std::cout<<"check"<<std::endl;
 	typename ft::map<Key, T>::const_iterator ite = map.end();
 	std::cout << "FT Map:" << std::endl;
 	while (it != ite){
@@ -40,35 +39,35 @@ void map_test(){
 	ft_map.insert(ft::pair<const int, int>(3, 11));
 	ft_map.insert(ft::pair<const int, int>(10, 11));
 	ft_map.insert(ft::pair<const int, int>(6, 11));
-	std::cout << ft_map.size() << std::endl;
+	// std::cout << ft_map.size() << std::endl;
 
 	std_map.insert(std::pair<const int, int>(5, 10));
 	std_map.insert(std::pair<const int, int>(3, 11));
 	std_map.insert(std::pair<const int, int>(10, 11));
 	std_map.insert(std::pair<const int, int>(6, 11));
-	std::cout << std_map.size() << std::endl;
+	// std::cout << std_map.size() << std::endl;
 
-	// std::cout << "Empty Constructor and insert single elements" << std::endl;
-	// print_ft_map(ft_map);
-	// print_std_map(std_map);
+	std::cout << "Empty Constructor and insert single elements" << std::endl;
+	print_ft_map(ft_map);
+	print_std_map(std_map);
 
-	// ft::map<int, int> ft_map2(++ft_map.begin(), --ft_map.end());
-	// std::map<int, int> std_map2(++std_map.begin(), --std_map.end());
-	// std::cout << "Constructor with iterators" << std::endl;
-	// print_ft_map(ft_map2);
-	// print_std_map(std_map2);
+	ft::map<int, int> ft_map2(++ft_map.begin(), --ft_map.end());
+	std::map<int, int> std_map2(++std_map.begin(), --std_map.end());
+	std::cout << "Constructor with iterators" << std::endl;
+	print_ft_map(ft_map2);
+	print_std_map(std_map2);
 
-	// ft::map<int, int> ft_map3(ft_map2);
-	// std::map<int, int> std_map3(std_map2);
-	// std::cout << "Copy constructor" << std::endl;
-	// print_ft_map(ft_map3);
-	// print_std_map(std_map3);
+	ft::map<int, int> ft_map3(ft_map2);
+	std::map<int, int> std_map3(std_map2);
+	std::cout << "Copy constructor" << std::endl;
+	print_ft_map(ft_map3);
+	print_std_map(std_map3);
 
-	// ft_map3.clear();
-	// std_map3.clear();
-	// std::cout << "After Clear function" << std::endl;
-	// print_ft_map(ft_map3);
-	// print_std_map(std_map3);
+	ft_map3.clear();
+	std_map3.clear();
+	std::cout << "After Clear function" << std::endl;
+	print_ft_map(ft_map3);
+	print_std_map(std_map3);
 
 	// std::cout << "Empty function on empty maps" << std::endl;
 	// std::cout << "FT map: " << ft_map3.empty() << std::endl;
@@ -87,12 +86,12 @@ void map_test(){
 	// std::cout << "STD map: " << std_map2[5] << std::endl;
 
 	// std::cout << std::endl << "Insert with hints" << std::endl;
-	// // ft_map.insert(++ft_map.begin(), std::pair<const int, int>(30, 5));
+	// ft_map.insert(++ft_map.begin(), std::pair<const int, int>(30, 5));
 	// std_map.insert(++std_map.begin(), std::pair<const int, int>(30, 5));
 	// print_ft_map(ft_map);
 	// print_std_map(std_map);
 
-	// // ft_map2.insert(std::pair<const int, int>(-10, -5));
+	// ft_map2.insert(std::pair<const int, int>(-10, -5));
 	// std_map2.insert(std::pair<const int, int>(-10, -5));
 	// std::cout << std::endl << "Insert with iterators with already existing elements" << std::endl;
 	// ft_map.insert(ft_map2.begin(), ft_map2.end());

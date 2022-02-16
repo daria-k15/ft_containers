@@ -15,6 +15,97 @@ namespace ft{
 	template<class T>struct remove_const{typedef T type;};
 	template<class T>struct remove_const<const T>{typedef T type;};
 
+	template<class T, bool V>
+	struct integral_const{
+		static const bool value = V;
+		typedef T value_type;
+		typedef integral_const type;
+		operator value_type() const{return value;}
+	};
+
+	template<class T> struct is_integral : public ft::integral_const<T, false>{};
+	template <> struct is_integral<bool> : public ft::integral_const<bool, false>{};
+	template <> struct is_integral<char> : public ft::integral_const<bool, true> {};
+	template <> struct is_integral<signed char>	: public ft::integral_const<bool, true> {};
+	template <> struct is_integral<unsigned char> : public ft::integral_const<bool, true> {};
+	template <> struct is_integral<wchar_t>	 : public ft::integral_const<bool, true> {};
+	template <> struct is_integral<char16_t> : public ft::integral_const<bool, true> {};
+	template <> struct is_integral<short> : public ft::integral_const<bool, true> {};
+	template <> struct is_integral<unsigned short> : public ft::integral_const<bool, true> {};
+	template <> struct is_integral<int>	: public ft::integral_const<bool, true> {};
+	template <> struct is_integral<unsigned int> : public ft::integral_const<bool, true> {};
+	template <> struct is_integral<long> : public ft::integral_const<bool, true> {};
+	template <> struct is_integral<unsigned long> : public ft::integral_const<bool, true> {};
+	template <> struct is_integral<long long> : public ft::integral_const<bool, true> {};
+	template <> struct is_integral<unsigned long long>	: public ft::integral_const<bool, true> {};
+	
+	template<class InputIter1, class InputIter2>
+	bool equal(InputIter1 first1, InputIter1 last1, InputIter2 first2){
+		for (; first1 != last1; ++first1, ++first2){
+			if (*first1 != *first2)
+				return false;
+		}
+		return true;
+	}
+
+	template<class InputIter1, class InputIter2, class BinaryPredicate>
+	bool equal(InputIter1 first1, InputIter1 last1, InputIter2 first2, BinaryPredicate p) {
+		for (; first1 != last1; ++first1, ++first2) {
+			if (!p(*first1, *first2)) {
+				return false;
+			}
+		}
+    	return true;
+	}
+
+	template<class InputIter1, class InputIter2>
+	bool lexicographical_compare(InputIter1 first1, InputIter1 last1, InputIter2 first2, InputIter2 last2) {
+		for ( ; (first1 != last1) && (first2 != last2); ++first1, (void) ++first2 ) {
+			if (*first1 < *first2) return true;
+			if (*first2 < *first1) return false;
+		}
+		return (first1 == last1) && (first2 != last2);
+	}
+
+	template<class InputIt1, class InputIt2, class Compare>
+	bool lexicographical_compare(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp) {
+		for ( ; (first1 != last1) && (first2 != last2); ++first1, (void) ++first2 ) {
+			if (comp(*first1, *first2)) return true;
+			if (comp(*first2, *first1)) return false;
+		}
+		return (first1 == last1) && (first2 != last2);
+	}
+
+	template <class Iterator>
+	class iterator_traits{
+		public:
+			typedef typename Iterator::diff_type			diff_type;
+			typedef typename Iterator::value_type			value_type;
+			typedef typename Iterator::pointer				pointer;
+			typedef typename Iterator::reference			reference;
+			typedef typename Iterator::iterator_category	iterator_category;
+	};
+
+	template <class T>
+	class iterator_traits<T*>{
+		public:		
+			typedef std::ptrdiff_t						diff_t;
+			typedef T									value_type;
+			typedef T*									pointer;
+			typedef T&									reference;
+			typedef std::random_access_iterator_tag		iterator_category;
+	};
+
+	template <class T>
+	class iterator_traits<const T*>{
+		public:		
+			typedef std::ptrdiff_t						diff_t;
+			typedef const T								value_type;
+			typedef const T*							pointer;
+			typedef const T&							reference;
+			typedef std::random_access_iterator_tag		iterator_category;
+	};
+
 	template<class K, class V>
 	struct pair{
 		typedef K	first_type;
@@ -47,31 +138,31 @@ namespace ft{
 
 	template<class T1, class T2>
 	bool operator==(const ft::pair<T1, T2> &lhs, const ft::pair<T1, T2> &rhs){
-		return (lhs.key == rhs.key && lhs.value == rhs.value);
+		return (lhs.first == rhs.first && lhs.second == rhs.second);
 	}
 
 	template<class T1, class T2>
 	bool operator!=(const ft::pair<T1, T2> &lhs, const ft::pair<T1, T2> &rhs){
-		return (lhs.key != rhs.key && lhs.value != rhs.value);
+		return (lhs != rhs);
 	}
 	template<class T1, class T2>
 	bool operator>(const ft::pair<T1, T2> &lhs, const ft::pair<T1, T2> &rhs){
-		return (lhs.key > rhs.key && lhs.value > rhs.value);
+		return (lhs.first > rhs.first && lhs.second > rhs.second);
 	}
 
 	template<class T1, class T2>
 	bool operator>=(const ft::pair<T1, T2> &lhs, const ft::pair<T1, T2> &rhs){
-		return (lhs.key >= rhs.key && lhs.value >= rhs.value);
+		return (lhs.first >= rhs.first && lhs.second >= rhs.second);
 	}
 
 	template<class T1, class T2>
 	bool operator<(const ft::pair<T1, T2> &lhs, const ft::pair<T1, T2> &rhs){
-		return (lhs.key < rhs.key && lhs.value < rhs.value);
+		return (lhs.first < rhs.first && lhs.second < rhs.second);
 	}
 
 	template<class T1, class T2>
 	bool operator<=(const ft::pair<T1, T2> &lhs, const ft::pair<T1, T2> &rhs){
-		return (lhs.key <= rhs.key && lhs.value <= rhs.value);
+		return (lhs.first <= rhs.first && lhs.second <= rhs.second);
 	}
 
 	template <class Value>

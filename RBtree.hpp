@@ -4,46 +4,48 @@
 #include <memory>
 #include <functional>
 #include <iostream>
+#include <limits>
 #include "Iter.hpp"
+#include "ReverseIter.hpp"
 #include "utils.hpp"
 
 namespace ft{
 	template <class Value, class Compare = std::less<Value>, class Allocator = std::allocator<Value> >
 	class rbtree{
 		public:
-			typedef Value																value_type;
-			typedef Compare 															value_compare;
-			typedef Allocator 															allocator_type;
+			typedef Value																		value_type;
+			typedef Compare 																	value_compare;
+			typedef Allocator 																	allocator_type;
 			typedef typename allocator_type::template rebind<ft::Node<value_type> >::other		node_alloc;
-			typedef typename node_alloc::pointer										node_pointer;
-			typedef typename allocator_type::reference 										reference;
-			typedef typename allocator_type::const_reference 								const_reference;
-			typedef typename allocator_type::pointer 										pointer;
-			typedef typename allocator_type::const_pointer 									const_pointer;
-			typedef std::ptrdiff_t 														diff_type;
-			typedef std::size_t 														size_type;
-			typedef ft::TreeIterator<Value> 											iterator;
-			typedef ft::ConstTreeIterator<Value> 									const_iterator;
-			typedef ft::ReverseIterator<Value> 										reverse_iterator;
-			typedef ft::ConstReverseIterator<Value> 							const_reverse_iterator;
+			typedef typename node_alloc::pointer												node_pointer;
+			typedef typename allocator_type::reference 											reference;
+			typedef typename allocator_type::const_reference 									const_reference;
+			typedef typename allocator_type::pointer 											pointer;
+			typedef typename allocator_type::const_pointer 										const_pointer;
+			typedef std::ptrdiff_t 																diff_type;
+			typedef std::size_t 																size_type;
+			typedef class ft::TreeIterator<Value> 												iterator;
+			typedef class ft::TreeIterator<Value> 												const_iterator;
+			typedef class ft::ReverseIterator<iterator> 										reverse_iterator;
+			typedef class ft::ReverseIterator<const_iterator> 									const_reverse_iterator;
 
 		private:
 			allocator_type		_alloc;
-			node_alloc		_node_alloc;
-			value_compare	_compare;
-			node_pointer	_nil;
-			node_pointer	_head;
-			node_pointer	_root;
-			size_type		_size;
+			node_alloc			_node_alloc;
+			value_compare		_compare;
+			node_pointer		_nil;
+			node_pointer		_head;
+			node_pointer		_root;
+			size_type			_size;
 
 			node_pointer tree_min(node_pointer node) const{
-				while (node != NULL && !is_nil(node->left))
+				while (node->left && !is_nil(node->left))
 					node = node->left;
 				return (node);
 			}
 
 			node_pointer tree_max(node_pointer node) const{
-				while (node != NULL && !is_nil(node->right))
+				while (node->right && !is_nil(node->right))
 					node = node->right;
 				return node;
 			}
@@ -83,8 +85,11 @@ namespace ft{
 
 				tmp = node->left;
 				node->left = tmp->right;
-				if (!is_nil(tmp->parent))
+				if (!is_nil(tmp->right))
 					tmp->right->parent = node;
+				tmp->parent = node->parent;
+				if (!node->parent)
+					_root = tmp;
 				else if (node == node->parent->left)
 					node->parent->left = tmp;
 				else
@@ -103,46 +108,37 @@ namespace ft{
 				tmp->parent = node->parent;
 				if (node->parent == NULL)
 					_root = tmp;
-				else if (node == node->parent->left)
-					node->parent->left = tmp;
-				else
+				else if (node == node->parent->right)
 					node->parent->right = tmp;
+				else
+					node->parent->left = tmp;
 				tmp->left = node;
 				node->parent = tmp;
 			}
 
-			// node_pointer _insert(node_pointer newNode){
-			// 	if (_root == _head)
-			// 		_root = newNode;
-			// 	else
-			// 		insert_to_node(_root, newNode);
-			// 	return (newNode);
-			// }
-
-			node_pointer insert_to_node(node_pointer root, node_pointer newNode){
-				if (_compare(*newNode->value, *root->value)){
-					if (!is_nil(root->left))
-						return(insert_to_node(root->left, newNode));
-					root->left = newNode;
+			node_pointer insert_to_node(node_pointer where, node_pointer node){
+				if (_compare(*(node->value), *(where->value))){
+					if (!is_nil(where->left))
+						return(insert_to_node(where->left, node));
+					where->left = node;
 				} else {
-					if (!is_nil(root->right))
-						return insert_to_node(root->right, newNode);
-					root->right = newNode;
+					if (!is_nil(where->right))
+						return insert_to_node(where->right, node);
+					where->right = node;
 				}
-				newNode->parent = root;
-				return newNode;
+				node->parent = where;
+				return node;
 			}
 
 			node_pointer insert_to_tree(node_pointer n, node_pointer where){
 				if (_root == _head)
 					_root = n;
 				else
-					insert_to_node(where, n);
+					where == _root ? insert_to_node(where, n) : insert_to_node(_root, n);
 				return n;
 			}
 
 			void insertFixUp(node_pointer node){
-				node_pointer parent = node->parent;
 				if (node != _root && node->parent != _root){
 					node_pointer gparent = node->parent->parent;
 					while (node != _root && !node->parent->is_black){
@@ -242,7 +238,7 @@ namespace ft{
 
 			node_pointer copyNode(node_pointer node){
 				node_pointer res = _node_alloc.allocate(1);
-				_node_alloc.construct(res,  ft::Node<Value>());
+				_node_alloc.construct(res,  Node<Value>());
 				res->is_black = node->is_black;
 				res->is_nil = node->is_nil;
 				if (node->value){
@@ -262,7 +258,7 @@ namespace ft{
 				}
 				if(other->right->is_nil)
 					node->right = _nil;
-				else if (other->right->right == NULL){
+				else if (!other->right->right){
 					node->right = _head;
 					_head->parent = node;
 				} else {
@@ -293,15 +289,6 @@ namespace ft{
 				node->parent = where->parent;
 			}
 
-			iterator find(const value_type& value){
-				node_pointer node = search(value, _root);
-				return (node == NULL ? end() : iterator(node));
-			}
-
-			const_iterator find(const value_type& value) const{
-				node_pointer node = search(value, _root);
-				return (node == NULL ? end() : const_iterator(node));
-			}
 
 
 		public:
@@ -313,12 +300,21 @@ namespace ft{
 
 			explicit rbtree(const value_compare & comp = value_compare(), const allocator_type & alloc = allocator_type()) : 
 				_alloc(alloc), _compare(comp), _node_alloc(node_alloc()){
-				_size = 0;
 				init_head();
 				_root = _head;
+				_size = 0;
 			}
 
-			rbtree(const rbtree &x) : _compare(x._compare){
+			template<class InputIt>
+			rbtree(InputIt first, InputIt last, const value_compare& comp = value_compare(), const allocator_type& alloc = allocator_type(), 
+				typename enable_if<!std::numeric_limits<InputIt>::is_specialized>::type * = 0) : _alloc(alloc), _node_alloc(node_alloc()), _compare(comp){
+				 init_head();
+				 _root = _head;
+				 _size = 0;
+				 insert(first, last);
+			 }
+
+			rbtree(const rbtree &x) : _alloc(x._alloc), _node_alloc(x._alloc), _compare(x._compare){
 				*this = x;
 			}
 
@@ -344,18 +340,12 @@ namespace ft{
 
 			~rbtree(){
 				clearNode(_root);
-				clearTree(_head);
+				_alloc.destroy(_head->value);
+				_alloc.deallocate(_head->value, 1);
+				_node_alloc.deallocate(_head, 1);
 				_node_alloc.deallocate(_nil, 1);
 			}
 
-			template<class InputIt>
-			rbtree(InputIt first, InputIt last, const value_compare& comp = value_compare(), const allocator_type& alloc = allocator_type(),
-			typename ft::enable_if<!std::numeric_limits<InputIt>::is_specialized>::type * = 0) : _alloc(alloc), _node_alloc(node_alloc()), _compare(comp){
-				 init_head();
-				 _root = _head;
-				 _size = 0;
-				 insert(first, last);
-			 }
 
 			iterator	end(){return(iterator(_head));}
 			const_iterator end() const{return (const_iterator(_head));}
@@ -381,13 +371,13 @@ namespace ft{
 			}
 
 			ft::pair<iterator, bool> insert(const_reference val){
-				iterator it = search(val, _root);
+				iterator it = find(val);
 				if (it != end())
 					return ft::pair<iterator, bool>(it, false);
 				node_pointer node = _node_alloc.allocate(1);
 				pointer data = _alloc.allocate(1);
 				_alloc.construct(data, val);
-				_node_alloc.construct(node, ft::Node<value_type>(data));
+				_node_alloc.construct(node, Node<value_type>(data));
 				node->left = node->right = _nil;
 				insert_to_tree(node, _root);
 				ft::pair<iterator, bool> res(iterator(node), true);
@@ -396,26 +386,25 @@ namespace ft{
 				node->right = _head;
 				_head->parent = node;
 				_size++;
-				std::cout << _size << std::endl;
 				return res;
 			}
 
 			iterator insert(iterator pos, const_reference value){
-				node_pointer res = search(value, _root);
-				if (res)
-					return iterator(res);
-				res = _node_alloc.allocate(1);
-				pointer point = _alloc.allocate(1);
-				_alloc.construct(point, value);
-				_node_alloc.construct(res, ft::Node<value_type>(point));
+				iterator it = find(value);
+				if (it != end())
+					return end();
+				node_pointer res = _node_alloc.allocate(1);
+				pointer data = _alloc.allocate(1);
+				_alloc.construct(data, value);
+				_node_alloc.construct(res, Node<value_type>(data));
 				res->left = res->right = _nil;
 				if (pos == begin()){
-					if (_compare(value, *pos))
+					if (pos != end() && _compare(value, *pos))
 						insert_to_tree(res, tree_min(_root));
 					else
 						insert_to_tree(res, _root);
 				} else if(pos == end()){
-					if (_compare(*(--pos), value))
+					if (pos != begin() && _compare(*(--pos), value))
 						insert_to_tree(res, _head->parent);
 					else
 						insert_to_tree(res, _root);
@@ -430,7 +419,7 @@ namespace ft{
 			}
 
 			template<class InputIt>
-			void insert(InputIt first, InputIt last, typename ft::enable_if<!std::numeric_limits<InputIt>::is_specialized>::type * = 0){
+			void insert(InputIt first, InputIt last, typename enable_if<!std::numeric_limits<InputIt>::is_specialized>::type * = 0){
 				for(; first != last; first++){
 					insert(*first);
 				}
@@ -467,7 +456,7 @@ namespace ft{
 				}
 				_nil->parent = NULL;
 				--_size;
-				if (_size){
+				if (_size > 0){
 					tmp = _size == 1 ? _root : tree_max(_root);
 					tmp->right = _head;
 					_head->parent = tmp;
@@ -504,47 +493,57 @@ namespace ft{
 				std::swap(_size, other._size);
 			}
 
-			size_type count(const value_type& value) const{return(find(value) != end());}
+			// size_type count(const value_type& value) const{return(find(value) != end());}
 
-			// iterator lower_bound(const value_type &val){
-			// 	for (iterator it == begin(); it < end(); ++it){
-			// 		if(!_compare(*it, val))
-			// 			return first;
-			// 	}
-			// 	return end();
-			// }
+			iterator find(const_reference value){
+				if (!_root || is_nil(_root))
+					return end();
+				node_pointer node = search(value, _root);
+				return (node ? iterator(node) : end());
+			}
 
-			// const_iterator lower_bound(const value_type &val)const{
-			// 	for(const_iterator it = begin(); it < end(); ++it){
-			// 		if (!_compare(*it, val))
-			// 			return it;
-			// 	}
-			// 	return it;
-			// }
+			const_iterator find(const_reference value) const{
+				if (!_root || is_nil(_root))
+					return end();
+				node_pointer node = search(value, _root);
+				return (node ? iterator(node) : end());
+			}
 
-			// iterator upper_bound(const value_type &val){
-			// 	for (iterator it = begin(); it < end(); ++it){
-			// 		if (_compare(*it, val))
-			// 			return it;
-			// 	}
-			// 	return it;
-			// }
+			iterator lower_bound(const value_type &val){
+				for (iterator it = begin(); it != end(); ++it){
+					if(!_compare(*it, val))
+						return it;
+				}
+				return end();
+			}
 
-			// const_iterator upper_bound(const value_type &val) const{
-			// 	for (const_iterator it = begin(); it < end(); ++it){
-			// 		if (_compare(*it, val))
-			// 			return it;
-			// 	}
-			// 	return it;
-			// }
+			const_iterator lower_bound(const value_type &val)const{
+				for(const_iterator it = begin(); it != end(); ++it){
+					if (!_compare(*it, val))
+						return static_cast<const_iterator>(it);
+				}
+				return end();
+			}
 
-			// pair<iterator, iterator> equal_range(const value_type &val){
-			// 	return make_pair(lower_bound(val), upper_bound(val));
-			// }
+			iterator upper_bound(const value_type &val){
+				for (iterator it = begin(); it != end(); ++it){
+					if (_compare(*it, val))
+						return it;
+				}
+				return end();
+			}
 
-			// pair<const_iterator, const_iterator>equal_range(const value_type &val){
-			// 	return make_pair(lower_bound(val), upper_bound(val));
-			// }
+			const_iterator upper_bound(const value_type &val) const{
+				for (const_iterator it = begin(); it != end(); ++it){
+					if (_compare(*it, val))
+						return static_cast<const_iterator>(it);
+				}
+				return end();
+			}
+
+			ft::pair<iterator, iterator> equal_range(const value_type &val){
+				return ft::make_pair(lower_bound(val), upper_bound(val));
+			}
 
 			
 
