@@ -15,7 +15,7 @@ namespace ft{
             typedef const typename ft::iterator_traits<Value *>::pointer    	const_pointer;
             typedef typename ft::iterator_traits<Value *>::diff_t      			diff_t;
             typedef std::size_t                             				    size_type;
-			typedef  Node<typename remove_const<Value>::type>*					node_pointer;
+			typedef  Node<typename remove_const<Value>::type>*				node_pointer;
 		protected:
 			node_pointer _root;
 			node_pointer find_min(node_pointer point) const{

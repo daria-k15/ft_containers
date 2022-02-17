@@ -79,7 +79,7 @@ namespace ft{
 	template <class Iterator>
 	class iterator_traits{
 		public:
-			typedef typename Iterator::diff_type			diff_type;
+			typedef typename Iterator::diff_t				diff_t;
 			typedef typename Iterator::value_type			value_type;
 			typedef typename Iterator::pointer				pointer;
 			typedef typename Iterator::reference			reference;
@@ -143,26 +143,30 @@ namespace ft{
 
 	template<class T1, class T2>
 	bool operator!=(const ft::pair<T1, T2> &lhs, const ft::pair<T1, T2> &rhs){
-		return (lhs != rhs);
+		return (!(lhs == rhs));
 	}
 	template<class T1, class T2>
 	bool operator>(const ft::pair<T1, T2> &lhs, const ft::pair<T1, T2> &rhs){
-		return (lhs.first > rhs.first && lhs.second > rhs.second);
+		return (!(lhs <= rhs));
 	}
 
 	template<class T1, class T2>
 	bool operator>=(const ft::pair<T1, T2> &lhs, const ft::pair<T1, T2> &rhs){
-		return (lhs.first >= rhs.first && lhs.second >= rhs.second);
+		return (!(lhs < rhs));
 	}
 
 	template<class T1, class T2>
 	bool operator<(const ft::pair<T1, T2> &lhs, const ft::pair<T1, T2> &rhs){
-		return (lhs.first < rhs.first && lhs.second < rhs.second);
+		if (lhs.first < rhs.first)
+			return true;
+		if (lhs.first > rhs.first)
+			return false;
+		return lhs.second < rhs.second;
 	}
 
 	template<class T1, class T2>
 	bool operator<=(const ft::pair<T1, T2> &lhs, const ft::pair<T1, T2> &rhs){
-		return (lhs.first <= rhs.first && lhs.second <= rhs.second);
+		return (lhs < rhs || lhs == rhs);
 	}
 
 	template <class Value>

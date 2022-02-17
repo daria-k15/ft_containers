@@ -140,39 +140,39 @@ namespace ft{
 
 			void insertFixUp(node_pointer node){
 				if (node != _root && node->parent != _root){
-					node_pointer gparent = node->parent->parent;
+					// node_pointer gparent = node->parent->parent;
 					while (node != _root && !node->parent->is_black){
-						if (node->parent == gparent->left){
-							node_pointer uncle = gparent->right;
+						if (node->parent == node->parent->parent->left){
+							node_pointer uncle = node->parent->parent->right;
 							if (!uncle->is_black){
 								node->parent->is_black = true;
 								uncle->is_black = true;
-								gparent->is_black = false;
-								node = gparent;
+								node->parent->parent->is_black = false;
+								node = node->parent->parent;
 							} else {
 								if (node == node->parent->right){
 									node = node->parent;
 									rotate_left(node);
 								}
 								node->parent->is_black = true;
-								gparent->is_black = false;
-								rotate_right(gparent);
+								node->parent->parent->is_black = false;
+								rotate_right(node->parent->parent);
 							}
 						} else {
-							node_pointer uncle = gparent->left;
+							node_pointer uncle = node->parent->parent->left;
 							if (!uncle->is_black){
 								node->parent->is_black = true;
 								uncle->is_black = true;
-								gparent->is_black = false;
-								node = gparent;
+								node->parent->parent->is_black = false;
+								node = node->parent->parent;
 							} else {
 								if (node == node->parent->left){
 									node = node->parent;
 									rotate_right(node);
 								}
 								node->parent->is_black = true;
-								gparent->is_black = true;
-								rotate_left(gparent);
+								node->parent->parent->is_black = true;
+								rotate_left(node->parent->parent);
 							}
 						}
 					}
@@ -314,7 +314,7 @@ namespace ft{
 				 insert(first, last);
 			 }
 
-			rbtree(const rbtree &x) : _alloc(x._alloc), _node_alloc(x._alloc), _compare(x._compare){
+			rbtree(const rbtree &x) : _alloc(x._alloc), _node_alloc(x._node_alloc), _compare(x._compare){
 				*this = x;
 			}
 
@@ -326,7 +326,7 @@ namespace ft{
 					if (this->_root == NULL)
 						init_head();
 					else
-						clearNode(_root);
+						clearTree(_root);
 					if (x._size == 0)
 						this->_root = this->_head;
 					else{
@@ -339,11 +339,11 @@ namespace ft{
 			}
 
 			~rbtree(){
-				clearNode(_root);
-				_alloc.destroy(_head->value);
-				_alloc.deallocate(_head->value, 1);
-				_node_alloc.deallocate(_head, 1);
-				_node_alloc.deallocate(_nil, 1);
+				// clearNode(_root);
+				// _alloc.destroy(_head->value);
+				// _alloc.deallocate(_head->value, 1);
+				// _node_alloc.deallocate(_head, 1);
+				// _node_alloc.deallocate(_nil, 1);
 			}
 
 
@@ -364,13 +364,13 @@ namespace ft{
 			size_type max_size() const {return std::numeric_limits<size_type>::max() / sizeof(size_type);}
 	
 			void clear(){
-				clearTree(_root);
+				clearNode(_root);
 				_size = 0;
 				_root = _head;
 				_head->parent = NULL;
 			}
 
-			ft::pair<iterator, bool> insert(const_reference val){
+			pair<iterator, bool> insert(const_reference val){
 				iterator it = find(val);
 				if (it != end())
 					return ft::pair<iterator, bool>(it, false);
@@ -390,32 +390,65 @@ namespace ft{
 			}
 
 			iterator insert(iterator pos, const_reference value){
-				iterator it = find(value);
-				if (it != end())
-					return end();
-				node_pointer res = _node_alloc.allocate(1);
+				node_pointer node = search(value, _root);
+				if (node)
+					return iterator(node);
+				node = _node_alloc.allocate(1);
 				pointer data = _alloc.allocate(1);
 				_alloc.construct(data, value);
-				_node_alloc.construct(res, Node<value_type>(data));
-				res->left = res->right = _nil;
-				if (pos == begin()){
-					if (pos != end() && _compare(value, *pos))
-						insert_to_tree(res, tree_min(_root));
-					else
-						insert_to_tree(res, _root);
-				} else if(pos == end()){
-					if (pos != begin() && _compare(*(--pos), value))
-						insert_to_tree(res, _head->parent);
-					else
-						insert_to_tree(res, _root);
-				} else 
-					insert_to_tree(res, _root);
-				insertFixUp(res);
+				_node_alloc.construct(node, Node<value_type>(data));
+				node->left = node->left = _nil;
+				if (pos == end()){
+					--pos;
+					insert_to_tree(node, end() == begin() || _compare(value, *pos) ? _root : _head->parent);
+				}else if(pos == begin())
+					insert_to_tree(node, end() == begin() || _compare(*pos, value) ? _root : tree_min(_root));
+				else
+					insert_to_tree(node, _root);
+				// if (pos == begin()){
+				// 	if (pos != end() && _compare(value, *pos))
+				// 		insert_to_tree(node, tree_min(_root));
+				// 	else
+				// 		insert_to_tree(node, _root);
+				// }else if (pos == end()){
+				// 	if(pos != begin() && _compare(*(--pos), value))
+				// 		insert_to_tree(node, _head->parent);
+				// 	else
+				// 		insert_to_tree(node, _root); 
+				// } else
+				// 	insert_to_tree(node, _root);
+				insertFixUp(node);
 				++_size;
 				node_pointer max_v = tree_max(_root);
 				max_v->right = _head;
 				_head->parent = max_v;
-				return iterator(res);
+				return iterator(node);
+				// iterator it = find(value);
+				// if (it != end())
+				// 	return end();
+				// node_pointer res = _node_alloc.allocate(1);
+				// pointer data = _alloc.allocate(1);
+				// _alloc.construct(data, value);
+				// _node_alloc.construct(res, Node<value_type>(data));
+				// res->left = res->right = _nil;
+				// if (pos == begin()){
+				// 	if (pos != end() && _compare(value, *pos))
+				// 		insert_to_tree(res, tree_min(_root));
+				// 	else
+				// 		insert_to_tree(res, _root);
+				// } else if(pos == end()){
+				// 	if (pos != begin() && _compare(*(--pos), value))
+				// 		insert_to_tree(res, _head->parent);
+				// 	else
+				// 		insert_to_tree(res, _root);
+				// } else 
+				// 	insert_to_tree(res, _root);
+				// insertFixUp(res);
+				// ++_size;
+				// node_pointer max_v = tree_max(_root);
+				// max_v->right = _head;
+				// _head->parent = max_v;
+				// return iterator(res);
 			}
 
 			template<class InputIt>
@@ -474,7 +507,7 @@ namespace ft{
 
 			void erase(iterator first, iterator last){
 				while (first != last){
-					erase(*first);
+					erase(first);
 					++first;
 				}
 			}
@@ -527,7 +560,7 @@ namespace ft{
 
 			iterator upper_bound(const value_type &val){
 				for (iterator it = begin(); it != end(); ++it){
-					if (_compare(*it, val))
+					if (_compare(val, *it))
 						return it;
 				}
 				return end();
@@ -535,7 +568,7 @@ namespace ft{
 
 			const_iterator upper_bound(const value_type &val) const{
 				for (const_iterator it = begin(); it != end(); ++it){
-					if (_compare(*it, val))
+					if (_compare(val, *it))
 						return static_cast<const_iterator>(it);
 				}
 				return end();

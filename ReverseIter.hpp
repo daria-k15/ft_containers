@@ -10,7 +10,7 @@ namespace ft{
                 typedef Iterator                                                    it_type;
                 typedef typename ft::iterator_traits<Iterator>::iterator_category   iterator_category; 
                 typedef typename ft::iterator_traits<Iterator>::value_type          value_type;
-                typedef typename ft::iterator_traits<Iterator>::diff_t              diff_t;
+                typedef typename ft::iterator_traits<Iterator>::diff_t           diff_t;
                 typedef typename ft::iterator_traits<Iterator>::pointer             pointer;
                 typedef typename ft::iterator_traits<Iterator>::reference           reference;
             private:

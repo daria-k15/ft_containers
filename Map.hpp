@@ -62,6 +62,8 @@ namespace ft{
 				}
 				return *this;
 			}
+			
+			~map(){}
 
 			mapped_type & at(const key_type& key){
 				iterator it = find(key);
@@ -90,7 +92,7 @@ namespace ft{
 			bool empty() const{return _rbtree.empty();}
 
 			value_compare value_comp() const{return value_compare(_compare);}
-			key_compare key_com() const{return _compare;}
+			key_compare key_comp() const{return _compare;}
 
 			iterator begin(){return _rbtree.begin();}
 			const_iterator begin() const{return _rbtree.begin();}
@@ -102,7 +104,7 @@ namespace ft{
 			const_reverse_iterator rend() const{return _rbtree.rend();}
 
 
-			ft::pair<iterator, bool>insert(const value_type &value){
+			pair<iterator, bool>insert(const value_type &value){
 				return _rbtree.insert(value);
 			}
 
