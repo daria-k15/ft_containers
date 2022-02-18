@@ -196,7 +196,6 @@ namespace ft{
 				return *this;
 			}
 
-		// virtual ~Node(){}
 	};
 };
 

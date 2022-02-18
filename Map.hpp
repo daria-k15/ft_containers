@@ -196,12 +196,17 @@ namespace ft{
 			return true;
 		typename ft::map<Key, T, Compare, Allocator>::const_iterator it = x.begin();
 		typename ft::map<Key, T, Compare, Allocator>::const_iterator ite = y.begin();
-		while (it != x.end() && ite != y.end()){
+		for (; it != ite; it++, ite++){
 			if (*it > *ite)
 				return true;
-			++it;
 		}
 		return false;
+		// while (it != x.end() && ite != y.end()){
+		// 	if (*it > *ite)
+		// 		return true;
+		// 	++it;
+		// }
+		// return false;
 	}
 
 	template <class Key, class T, class Compare, class Allocator>

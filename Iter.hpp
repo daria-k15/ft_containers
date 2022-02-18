@@ -47,7 +47,7 @@ namespace ft{
 			const_pointer operator->() const {return _root->value;}
 			reference operator*(){return *(_root->value);}
 			const_reference operator*() const {return *(_root->value);}
-			node_pointer getPointer() const{return _root;}
+			node_pointer getPointer() const {return _root;}
 
 
 			TreeIterator& operator++(){
@@ -79,7 +79,7 @@ namespace ft{
 		}
 
 		TreeIterator operator++(int){
-			TreeIterator<value_type> tmp(*this);
+			TreeIterator<value_type> tmp = ;
 			*this = operator++();
 			return tmp;
 		}
@@ -95,11 +95,10 @@ namespace ft{
 			return (_root == other._root);
 		}
 		template<class T>
-		bool operator!=(const TreeIterator<T>& other){
+		bool operator!=(const TreeIterator<T>& other) const{
 			return (_root != other._root);
 		}
 	};
-
 };
 
 #endif
