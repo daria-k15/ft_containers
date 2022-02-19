@@ -107,67 +107,48 @@ namespace ft{
 	};
 
 	template<class K, class V>
-	struct pair{
+	struct pair {
 		typedef K	first_type;
 		typedef V	second_type;
-
 		first_type first;
-		second_type	second;
-
+		second_type second;
 		pair() : first(), second() {}
-		pair(const first_type &x, const second_type &y) : first(x), second(y){}
-
-		template<class T1, class T2>
-		pair(const pair<T1, T2> &other): first(other.first), second(other.second){}	
-
-		pair(const pair& other) : first(other.first), second(other.second){}
-
-		pair&operator=(pair const &other){
-			if (this != &other){
+		pair(const first_type & x, const second_type & y) : first(x), second(y) {}
+		template<class U1, class U2>
+		pair(const pair<U1, U2> & other) : first(other.first), second(other.second) {}
+		pair(const pair & other) : first(other.first), second(other.second) {}
+		pair & operator=(const pair & other) {
+			if (this != &other) {
 				first = other.first;
 				second = other.second;
 			}
 			return *this;
 		}
 	};
+	template<class T1, class T2>
+	ft::pair<T1, T2> make_pair(T1 t, T2 u) { return ft::pair<T1, T2>(t, u); }
 
-	template<class T1, class T2>
-	ft::pair<T1, T2> make_pair(T1 t1, T2 t2){
-		return (ft::pair<T1, T2>(t1, t2));
-	}
+	template< class T1, class T2 >
+	bool operator==(const ft::pair<T1,T2>& lhs, const ft::pair<T1,T2>& rhs) { return lhs.first == rhs.first && lhs.second == rhs.second; }
 
-	template<class T1, class T2>
-	bool operator==(const ft::pair<T1, T2> &lhs, const ft::pair<T1, T2> &rhs){
-		return (lhs.first == rhs.first && lhs.second == rhs.second);
-	}
-
-	template<class T1, class T2>
-	bool operator!=(const ft::pair<T1, T2> &lhs, const ft::pair<T1, T2> &rhs){
-		return (!(lhs == rhs));
-	}
-	template<class T1, class T2>
-	bool operator>(const ft::pair<T1, T2> &lhs, const ft::pair<T1, T2> &rhs){
-		return (!(lhs <= rhs));
-	}
-
-	template<class T1, class T2>
-	bool operator>=(const ft::pair<T1, T2> &lhs, const ft::pair<T1, T2> &rhs){
-		return (!(lhs < rhs));
-	}
-
-	template<class T1, class T2>
-	bool operator<(const ft::pair<T1, T2> &lhs, const ft::pair<T1, T2> &rhs){
+	template< class T1, class T2 >
+	bool operator!=(const ft::pair<T1,T2>& lhs, const ft::pair<T1,T2>& rhs) { return !(lhs == rhs); }
+	
+	template< class T1, class T2 >
+	bool operator<(const ft::pair<T1,T2>& lhs, const ft::pair<T1,T2>& rhs) {
 		if (lhs.first < rhs.first)
 			return true;
 		if (lhs.first > rhs.first)
 			return false;
 		return lhs.second < rhs.second;
 	}
+	template< class T1, class T2 >
+	bool operator<=(const ft::pair<T1,T2>& lhs, const ft::pair<T1,T2>& rhs) { return lhs < rhs || lhs == rhs; }
+	template< class T1, class T2 >
+	bool operator>(const ft::pair<T1,T2>& lhs, const ft::pair<T1,T2>& rhs) { return !(lhs <= rhs); }
+	template< class T1, class T2 >
+	bool operator>=(const ft::pair<T1,T2>& lhs, const ft::pair<T1,T2>& rhs) { return !(lhs < rhs); }
 
-	template<class T1, class T2>
-	bool operator<=(const ft::pair<T1, T2> &lhs, const ft::pair<T1, T2> &rhs){
-		return (lhs < rhs || lhs == rhs);
-	}
 
 	template <class Value>
 	struct Node{

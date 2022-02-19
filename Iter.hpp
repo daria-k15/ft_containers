@@ -96,9 +96,10 @@ namespace ft{
 		}
 		template<class T>
 		bool operator!=(const TreeIterator<T>& other){
-			return (_root != other._root);
+			return (!(_root == other._root));
 		}
 	};
+
 
 };
 

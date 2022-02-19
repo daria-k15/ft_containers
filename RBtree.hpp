@@ -18,16 +18,16 @@ namespace ft{
 			typedef Allocator 																	allocator_type;
 			typedef typename allocator_type::template rebind<ft::Node<value_type> >::other		node_alloc;
 			typedef typename node_alloc::pointer												node_pointer;
+			typedef typename allocator_type::pointer 											pointer;
 			typedef typename allocator_type::reference 											reference;
 			typedef typename allocator_type::const_reference 									const_reference;
-			typedef typename allocator_type::pointer 											pointer;
 			typedef typename allocator_type::const_pointer 										const_pointer;
 			typedef std::ptrdiff_t 																diff_type;
 			typedef std::size_t 																size_type;
 			typedef class ft::TreeIterator<Value> 												iterator;
-			typedef class ft::TreeIterator<Value> 												const_iterator;
+			typedef const class ft::TreeIterator<Value> 										const_iterator;
 			typedef class ft::ReverseIterator<iterator> 										reverse_iterator;
-			typedef class ft::ReverseIterator<const_iterator> 									const_reverse_iterator;
+			typedef class ft::ReverseIterator<const_iterator> 							const_reverse_iterator;
 
 		private:
 			allocator_type		_alloc;
@@ -314,7 +314,7 @@ namespace ft{
 				 insert(first, last);
 			 }
 
-			rbtree(const rbtree &x) : _alloc(x._alloc), _node_alloc(x._node_alloc), _compare(x._compare){
+			rbtree(rbtree const &x) : _alloc(x._alloc), _node_alloc(x._node_alloc), _compare(x._compare), _root(x._root), _head(x._head), _nil(x._nil), _size(x._size){
 				*this = x;
 			}
 

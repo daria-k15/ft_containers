@@ -52,7 +52,7 @@ namespace ft{
 				const allocator_type& alloc = allocator_type(), typename enable_if<!std::numeric_limits<InputIt>::is_specialized>::type * = 0):
 				 _compare(comp),_alloc(alloc), _rbtree(first, last, comp, alloc){}
 
-			map(const map &x): _compare(x._compare), _alloc(x._alloc), _rbtree(x._rbtree){}
+			map(map const &x): _compare(x._compare), _alloc(x._alloc), _rbtree(x._rbtree){*this = x;}
 
 			map & operator=(const map &x){
 				if (this != &x){
@@ -177,17 +177,16 @@ namespace ft{
 			return false;
 		typename ft::map<Key, T, Compare, Allocator>::const_iterator it = x.begin();
 		typename ft::map<Key, T, Compare, Allocator>::const_iterator ite = y.begin();
-		while (it != x.end()){
+		for (; it != x. end(); ++it, ++ite){
 			if (*it != *ite)
 				return false;
-			++it;
 		}
 		return true;
 	}
 
 	template <class Key, class T, class Compare, class Allocator>
 	bool operator!=(const ft::map<Key, T, Compare, Allocator>&x, const ft::map<Key, T, Compare, Allocator>&y){
-		return (x != y);
+		return (!(x == y));
 	}
 
 	template <class Key, class T, class Compare, class Allocator>
@@ -217,7 +216,7 @@ namespace ft{
 	template <class Key, class T, class Compare, class Allocator>
 	bool operator>=(const ft::map<Key, T, Compare, Allocator>&x, const ft::map<Key, T, Compare, Allocator>&y){
 		return (x >= y);
-	};
+	}
 
 };
 
