@@ -407,9 +407,8 @@ namespace ft{
 		}
 
 		void pop_back(){
-			if (_size > 0){
+			if (!empty()){
 				_alloc.destroy(_data + _size--);
-				// _size--;
 			}
 		}
 
@@ -559,8 +558,10 @@ namespace ft{
 		}
 
 		void clear(){
-			while (_size > 0)
-				this->pop_back();
+			for (size_type i = 0; i < _size; i++){
+				_alloc.destroy(_data + i);
+			}
+			_size = 0;
 		}
 
 		private:

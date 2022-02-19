@@ -36,72 +36,72 @@ void vector_test(){
 	ft::vector<int> ft_vec;
 	std::vector<int> std_vec;
 
-	// ft_vec.push_back(10);
-	// ft_vec.push_back(20);
-	// ft_vec.push_back(30);
-	// std_vec.push_back(10);
-	// std_vec.push_back(20);
-	// std_vec.push_back(30);
+	ft_vec.push_back(10);
+	ft_vec.push_back(20);
+	ft_vec.push_back(30);
+	std_vec.push_back(10);
+	std_vec.push_back(20);
+	std_vec.push_back(30);
 
-	// std::cout << "Empty vector and push_back " << std::endl;
-	// print_ft_vec(ft_vec);
-	// print_std_vec(std_vec);
+	std::cout << "Empty vector and push_back " << std::endl;
+	print_ft_vec(ft_vec);
+	print_std_vec(std_vec);
 
-	// ft_vec.pop_back();
-	// std_vec.pop_back();
-	// std::cout << "After pop_back" << std::endl;
-	// print_ft_vec(ft_vec);
-	// print_std_vec(std_vec);
+	ft_vec.pop_back();
+	std_vec.pop_back();
+	std::cout << "After pop_back" << std::endl;
+	print_ft_vec(ft_vec);
+	print_std_vec(std_vec);
 
-	// ft::vector<int> ft_vec2(5, -3);
-	// std::vector<int> std_vec2(5, -3);
-	// std::cout << "Vector constructor with 5 copies of -3" << std::endl;
-	// print_ft_vec(ft_vec2);
-	// print_std_vec(std_vec2);
+	ft::vector<int> ft_vec2(5, -3);
+	std::vector<int> std_vec2(5, -3);
+	std::cout << "Vector constructor with 5 copies of -3" << std::endl;
+	print_ft_vec(ft_vec2);
+	print_std_vec(std_vec2);
 
-	// ft::vector<int> ft_vec3(ft_vec.begin(), --ft_vec.end());
-	// std::vector<int> std_vec3(std_vec.begin(), --std_vec.end());
-	// std::cout << "Constructor with iterators" << std::endl;
-	// print_ft_vec(ft_vec3);
-	// print_std_vec(std_vec3);
+	ft::vector<int> ft_vec3(ft_vec.begin(), --ft_vec.end());
+	std::vector<int> std_vec3(std_vec.begin(), --std_vec.end());
+	std::cout << "Constructor with iterators" << std::endl;
+	print_ft_vec(ft_vec3);
+	print_std_vec(std_vec3);
 
-	// ft::vector<int> ft_vec4(ft_vec);
-	// std::vector<int> std_vec4(std_vec);
-	// std::cout << "Copy constructor" << std::endl;
-	// print_ft_vec(ft_vec4);
-	// print_std_vec(std_vec4);
+	ft::vector<int> ft_vec4(ft_vec);
+	std::vector<int> std_vec4(std_vec);
+	std::cout << "Copy constructor" << std::endl;
+	print_ft_vec(ft_vec4);
+	print_std_vec(std_vec4);
 
-	// ft_vec4.clear();
-	// std_vec4.clear();
-	// std::cout << "After clear fuction" << std::endl;
-	// print_ft_vec(ft_vec4);
-	// print_std_vec(std_vec4);
+	ft_vec4.clear();
+	std_vec4.clear();
+	std::cout << "After clear fuction" << std::endl;
+	print_ft_vec(ft_vec4);
+	print_std_vec(std_vec4);
 
-	// ft_vec4 = ft_vec3;
-	// std_vec4 = std_vec3;
-	// std::cout << "Operator =" << std::endl;
-	// print_ft_vec(ft_vec4);
-	// print_std_vec(std_vec4);
+	ft_vec4 = ft_vec3;
+	std_vec4 = std_vec3;
+	std::cout << "Operator =" << std::endl;
+	print_ft_vec(ft_vec4);
+	print_std_vec(std_vec4);
 
-	// std::cout << "Max size" << std::endl;
-	// std::cout << "FT vector\t" << ft_vec.max_size() << std::endl;
-	// std::cout << "STD vector\t" << std_vec.max_size() << std::endl << std::endl;
+	std::cout << "Max size" << std::endl;
+	std::cout << "FT vector\t" << ft_vec.max_size() << std::endl;
+	std::cout << "STD vector\t" << std_vec.max_size() << std::endl << std::endl;
 
-	// ft_vec2.resize(2);
-	// std_vec2.resize(2);
-	// std::cout << "After resize function" << std::endl;
-	// print_ft_vec(ft_vec2);
-	// print_std_vec(std_vec2);
+	ft_vec2.resize(2);
+	std_vec2.resize(2);
+	std::cout << "After resize function" << std::endl;
+	print_ft_vec(ft_vec2);
+	print_std_vec(std_vec2);
 
-	// std::cout << "Empty function on non-empty vector" << std::endl;
-	// std::cout << "FT vector\t" << ft_vec.empty() << std::endl;
-	// std::cout << "STD vector\t" << std_vec.empty() << std::endl << std::endl;
+	std::cout << "Empty function on non-empty vector" << std::endl;
+	std::cout << "FT vector\t" << ft_vec.empty() << std::endl;
+	std::cout << "STD vector\t" << std_vec.empty() << std::endl << std::endl;
 
-	// ft_vec2.clear();
-	// std_vec2.clear();
-	// std::cout << "Empty function on empty vector" << std::endl;
-	// std::cout << "FT vector\t" << ft_vec2.empty() << std::endl;
-	// std::cout << "STD vector\t" << ft_vec2.empty() << std::endl << std::endl;
+	ft_vec2.clear();
+	std_vec2.clear();
+	std::cout << "Empty function on empty vector" << std::endl;
+	std::cout << "FT vector\t" << ft_vec2.empty() << std::endl;
+	std::cout << "STD vector\t" << ft_vec2.empty() << std::endl << std::endl;
 
 	// ft_vec2.reserve(20);
 	// std_vec2.reserve(20);
@@ -153,11 +153,11 @@ void vector_test(){
 	// std::cout << "FT vector\t" << ft_vec.back() << std::endl;
 	// std::cout << "STD vector\t" << std_vec.back() << std::endl << std::endl;
 
-	ft_vec.insert(++ft_vec.begin(), 7);
-	std_vec.insert(++std_vec.begin(), 7);
-	std::cout << "After inserting single element (7) to iterator position" << std::endl;
-	print_ft_vec(ft_vec);
-	print_std_vec(std_vec);
+	// ft_vec.insert(++ft_vec.begin(), 7);
+	// std_vec.insert(++std_vec.begin(), 7);
+	// std::cout << "After inserting single element (7) to iterator position" << std::endl;
+	// print_ft_vec(ft_vec);
+	// print_std_vec(std_vec);
 
 	// ft_vec.insert(++ft_vec.begin(),3, -2);
 	// std_vec.insert(++std_vec.begin(), 3, -2);
