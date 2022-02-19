@@ -37,20 +37,20 @@ namespace ft{
 			}
 			TreeIterator& operator=(const TreeIterator<typename remove_const<Value>::type>& other){
 				if (this != &other)
-					this->_root = other._root;
+					_root = other._root;
 				return (*this);
 			}
 
 			~TreeIterator(){}
 
-			pointer operator->(){return _root->value;}
-			const_pointer operator->() const {return _root->value;}
-			reference operator*(){return *(_root->value);}
+			reference operator*(){return *_root->value;}
+			pointer operator->(){return &operator*();}
 			const_reference operator*() const {return *(_root->value);}
-			node_pointer getPointer() const{return _root;}
+			const_pointer operator->() const {return &operator*();}
+			node_pointer getPointer() const {return _root;}
 
 
-			TreeIterator& operator++(){
+			TreeIterator & operator++(){
 				if (_root->right != NULL && !_root->right->is_nil)
 					_root = find_min(_root->right);
 				else{
@@ -64,43 +64,51 @@ namespace ft{
 				return (*this);
 			}
 
-		TreeIterator& operator--(){
-			if (_root->left != NULL && !_root->left->is_nil)
-				_root = find_max(_root->left);
-			else{
-				node_pointer tmp = _root->parent;
-				while (tmp && _root == tmp->left){
+			TreeIterator operator++(int){
+				TreeIterator<value_type> tmp(*this);
+				if (!_root->right->is_nil)
+					_root = find_min(_root->right);
+				else{
+					node_pointer tmp = _root->parent;
+					while (tmp && _root == tmp->right){
+						_root = tmp;
+						tmp = tmp->parent;
+					}
 					_root = tmp;
-					tmp = tmp->parent;
 				}
-				_root = tmp;
+				return tmp;
 			}
-			return (*this);
-		}
 
-		TreeIterator operator++(int){
-			TreeIterator<value_type> tmp(*this);
-			*this = operator++();
-			return tmp;
-		}
+			TreeIterator& operator--(){
+				if (_root->left != NULL && !_root->left->is_nil)
+					_root = find_max(_root->left);
+				else{
+					node_pointer tmp = _root->parent;
+					while (tmp && _root == tmp->left){
+						_root = tmp;
+						tmp = tmp->parent;
+					}
+					_root = tmp;
+				}
+				return (*this);
+			}
 
-		TreeIterator operator--(int){
-			TreeIterator<value_type> tmp(*this);
-			*this = operator--();
-			return tmp;
-		}
 
-		template<class T>
-		bool operator==(const TreeIterator<T>& other){
-			return (_root == other._root);
-		}
-		template<class T>
-		bool operator!=(const TreeIterator<T>& other){
-			return (!(_root == other._root));
-		}
+			TreeIterator operator--(int){
+				TreeIterator<value_type> tmp(*this);
+				*this = operator--();
+				return tmp;
+			}
+
+			template<class T>
+			bool operator==(const TreeIterator<T>& other){
+				return (_root == other._root);
+			}
+			template<class T>
+			bool operator!=(const TreeIterator<T>& other) const{
+				return (_root != other._root);
+			}
 	};
-
-
 };
 
 #endif

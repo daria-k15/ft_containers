@@ -51,17 +51,17 @@ void map_test(){
 	print_ft_map(ft_map);
 	print_std_map(std_map);
 
-	// ft::map<int, int> ft_map2(++ft_map.begin(), --ft_map.end());
-	// std::map<int, int> std_map2(++std_map.begin(), --std_map.end());
-	// std::cout << "Constructor with iterators" << std::endl;
-	// print_ft_map(ft_map2);
-	// print_std_map(std_map2);
+	ft::map<int, int> ft_map2(++ft_map.begin(), --ft_map.end());
+	std::map<int, int> std_map2(++std_map.begin(), --std_map.end());
+	std::cout << "Constructor with iterators" << std::endl;
+	print_ft_map(ft_map2);
+	print_std_map(std_map2);
 
-	// ft::map<int, int> ft_map3(ft_map2);
-	// std::map<int, int> std_map3(std_map2);
-	// std::cout << "Copy constructor" << std::endl;
-	// print_ft_map(ft_map3);
-	// print_std_map(std_map3);
+	ft::map<int, int> ft_map3(ft_map2);
+	std::map<int, int> std_map3(std_map2);
+	std::cout << "Copy constructor" << std::endl;
+	print_ft_map(ft_map3);
+	print_std_map(std_map3);
 
 	// ft_map3.clear();
 	// std_map3.clear();

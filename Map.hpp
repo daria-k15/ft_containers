@@ -154,14 +154,14 @@ namespace ft{
 			}
 			iterator upper_bound(const key_type& key){
 				for (iterator it = begin(); it != end(); ++it){
-					if (_compare(it->first, key))
+					if (_compare(key, it->first))
 						return it;
 				}
 				return end();
 			}
 			const_iterator upper_bound(const key_type& key)const{
 				for (const_iterator it = begin(); it != end(); ++it){
-					if (_compare(it->first, key))
+					if (_compare(key, it->first))
 						return static_cast<const_iterator>(it);
 				}
 				return end();
@@ -173,15 +173,16 @@ namespace ft{
 
 	template <class Key, class T, class Compare, class Allocator>
 	bool operator==(const ft::map<Key, T, Compare, Allocator> &x, const ft::map<Key, T, Compare, Allocator> &y){
-		if (x.size() != y.size())
-			return false;
-		typename ft::map<Key, T, Compare, Allocator>::const_iterator it = x.begin();
-		typename ft::map<Key, T, Compare, Allocator>::const_iterator ite = y.begin();
-		for (; it != x. end(); ++it, ++ite){
-			if (*it != *ite)
-				return false;
+		if (x.size() == y.size()){
+			typename ft::map<Key, T, Compare, Allocator>::iterator it = x.begin();
+			typename ft::map<Key, T, Compare, Allocator>::iterator ite = y.begin();
+			for (; it != x. end(); ++it, ++ite){
+				if (*it != *ite)
+					return false;
+			}
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	template <class Key, class T, class Compare, class Allocator>
@@ -191,31 +192,28 @@ namespace ft{
 
 	template <class Key, class T, class Compare, class Allocator>
 	bool operator>(const ft::map<Key, T, Compare, Allocator>&x, const ft::map<Key, T, Compare, Allocator>&y){
-		if (x.size() > y.size())
-			return true;
-		typename ft::map<Key, T, Compare, Allocator>::const_iterator it = x.begin();
-		typename ft::map<Key, T, Compare, Allocator>::const_iterator ite = y.begin();
-		while (it != x.end() && ite != y.end()){
-			if (*it > *ite)
-				return true;
-			++it;
-		}
-		return false;
+		return (y < x);
 	}
 
 	template <class Key, class T, class Compare, class Allocator>
 	bool operator<(const ft::map<Key, T, Compare, Allocator>&x, const ft::map<Key, T, Compare, Allocator>&y){
-		return (x < y);
+		typename ft::map<Key, T, Compare, Allocator>::iterator it = x.begin();
+		typename ft::map<Key, T, Compare, Allocator>::iterator ite = y.begin();
+		for (; it != x.end() && ite != x.end(); it++, ite++){
+			if (*it != *ite)
+				return *it < *ite;
+		}
+		return x.size() < y.size();
 	}	
 
 	template <class Key, class T, class Compare, class Allocator>
 	bool operator<=(const ft::map<Key, T, Compare, Allocator>&x, const ft::map<Key, T, Compare, Allocator>&y){
-		return (x <= y);
+		return !(x > y);
 	}	
 
 	template <class Key, class T, class Compare, class Allocator>
 	bool operator>=(const ft::map<Key, T, Compare, Allocator>&x, const ft::map<Key, T, Compare, Allocator>&y){
-		return (x >= y);
+		return !(x < y);
 	}
 
 };
