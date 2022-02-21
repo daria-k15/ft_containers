@@ -128,7 +128,7 @@ namespace ft{
 
 	template <class T, class Compare, class Allocator>
 	bool operator>(const ft::set<T, Compare, Allocator> &x, const ft::set<T, Compare, Allocator> &y){	
-		return (!(y < x));
+		return ((y < x));
 	}
 
 	template <class T, class Compare, class Allocator>

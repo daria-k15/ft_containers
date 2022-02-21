@@ -1,0 +1,22 @@
+{
+	"makefile.extensionOutputFolder": "./.vscode",
+	"files.associations": {
+		"*.ipp": "cpp",
+		"__config": "cpp",
+		"ostream": "cpp",
+		"__node_handle": "cpp",
+		"deque": "cpp",
+		"exception": "cpp",
+		"filesystem": "cpp",
+		"fstream": "cpp",
+		"functional": "cpp",
+		"istream": "cpp",
+		"locale": "cpp",
+		"map": "cpp",
+		"memory": "cpp",
+		"new": "cpp",
+		"string": "cpp",
+		"utility": "cpp",
+		"__functional_base": "cpp"
+	}
+}

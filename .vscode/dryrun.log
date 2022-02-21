@@ -1,0 +1,6 @@
+make --dry-run --keep-going --print-directory
+make: Entering directory `/Users/heveline/Desktop/lol'
+make: Leaving directory `/Users/heveline/Desktop/lol'
+ 
+make: *** No targets specified and no makefile found.  Stop.
+ 
