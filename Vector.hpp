@@ -5,38 +5,59 @@
 #include <memory>
 #include <limits>
 #include "utils.hpp"
+#include "VectorIter.hpp"
 
 namespace ft{
     template <class T, class Allocator = std::allocator<T> >
     class vector{
         public:
-            typedef T										value_type;
-            typedef Allocator								allocator_type;
-            typedef std::size_t								size_type;
-            typedef ptrdiff_t								diff_type;
-            typedef typename Allocator::reference			ref;
-            typedef typename Allocator::const_reference		const_ref;
-            typedef typename Allocator::pointer				point;
-            typedef typename Allocator::const_pointer		const_point;
+            typedef T                                 					value_type;
+            typedef Allocator                         					allocator_type;
+            typedef std::size_t                       					size_type;
+            typedef T&                            						reference;
+            typedef const T&                          					const_reference;
+            typedef T*                                					pointer;
+            typedef const T*                          					const_pointer;
+            typedef class ft::VectorIterator<T>			  				iterator;
+            typedef class ft::ConstVectorIterator<T>      				const_iterator;
+            typedef class ft::ReverseVectorIterator<T>      			reverse_iterator;
+            typedef class ft::ConstReverseVectorIterator<T>  			const_reverse_iterator;
+			typedef typename ft::VectorIterator<T>::diff_t				diff_t;
+
         
         private:
             allocator_type  _alloc;
             size_type       _size;
             size_type       _capacity;
-            point           _data;
+            pointer          _data;
+
+			void capacity_realloc(size_type n){
+				pointer tmp = this->_alloc.allocate(n);
+				for (size_type i = 0; i < _size; i++)
+					_alloc.construct(tmp + i, _data[i]);
+				size_type tmp_size = _size;
+				this->delete_vect();
+				_size = tmp_size;
+				_capacity = n;
+				_data = tmp;
+			}
+
+			void delete_vect(){
+				if (this->_size != 0){
+					for (size_type i = 0; i < _size; i++)
+						_alloc.destroy(_data + i);
+					_alloc.deallocate(_data, _capacity);
+					_capacity = 0;
+					_size = 0;
+				}
+			}
+
 
         public:
-            explicit vector(const allocator_type &alloc = allocator_type()){
-                _alloc = alloc;
-                _size = 0;
-                _capacity = 0;
-               // _data = _alloc.allocate(20);
-            }
+            explicit vector(const allocator_type &alloc = allocator_type()) : _alloc(alloc), _capacity(0), _size(0){}
 
-            explicit vector(size_type n, const value_type &val = value_type(), const allocator_type &alloc = allocator_type()){
-                _alloc = alloc;
-                _size = n;
-                _capacity = n;
+            explicit vector(size_type n, const value_type &val = value_type(), const allocator_type &alloc = allocator_type()) : 
+				_alloc(alloc), _size(n), _capacity(n){
                 _data = _alloc.allocate(_capacity);
                 for(size_t i = 0; i < _size; i++)
                     _alloc.construct(_data + i, val);
@@ -51,16 +72,12 @@ namespace ft{
 				assign(first, last);
 			}
 
-			vector(const vector &x){ //??????
-				_size = 0;
-				_capacity = 0;
-				// _data = NULL;
-				// _alloc = x._alloc;
+			vector(const vector &x) : _alloc(allocator_type()), _size(0), _capacity(0), _data(NULL){
 				*this = x;
 			}
 
 			~vector(){
-				this->delete_vect();
+				delete_vect();
 			}
 
 			vector& operator= (const vector &x){
@@ -81,196 +98,30 @@ namespace ft{
 				return (*this);
 			}
 
-			/*Iterators*/
-
-		private:
-		class iter{
-			protected:
-				point _it_point;
-			public:
-				iter(){
-				_it_point = NULL;
-				}
-				explicit iter(point it_point){
-					_it_point = it_point;
-				}
-				virtual ~iter(){}
-				bool operator==(const iter &other) const{
-					return (this->_it_point == other._it_point);
-				}
-				bool operator!=(const iter &other) const{
-					return (this->_it_point != other._it_point);
-				}
-				T &operator*() const{
-					return *(this->_it_point);
-				}
-				T*operator->() const{
-					return (this->_it_point);
-				}
-				bool operator<(const iter &other) const{
-					return (this->_it_point < other._it_point);
-				}
-				bool operator>(const iter &other) const{
-					return (this->_it_point > other._it_point);
-				}
-				bool operator <=(const iter &other) const{
-					return (this->_it_point <= other._it_point);
-				}
-				bool operator >=(const iter &other) const{
-					return (this->_it_point >= other._it_point);
-				}
-				ref operator[](size_type n){
-					return (this->_it_point[n]);
-				}
-			};
-				
-		public:
-			typedef class iterator : public iter{
-			public:
-				iterator() : iter(){}
-				explicit iterator(point it) : iter(it){}
-				iterator &operator=(const iterator &other){
-					if (*this == other){
-						return (*this);
-					}
-					this->_it_point = other._it_point;
-					return (*this);
-				}
-				iterator(const iterator &other){
-					this->_it_point = other._it_point;
-				}
-				virtual ~iterator(){}
-				iterator &operator++(){
-					this->_it_point++;
-					return (*this);
-				}
-				iterator &operator--(){
-					this->_it_point--;
-					return (*this);
-				}
-				iterator operator++(int){
-					iterator prev_it(*this);
-					this->_it_point++;
-					return (prev_it);
-				}
-				iterator operator--(int){
-					iterator prev_it(*this);
-					this->_it_point--;
-					return (prev_it);
-				}
-				iterator &operator+=(int n){
-					this->_it_point += n;
-					return (*this);
-				}
-				iterator operator+(int n){
-					iterator tmp(*this);
-					return (tmp += n);
-				}
-				iterator &operator-=(int n){
-					this->_it_point -= n;
-					return (*this);
-				}
-				iterator operator-(int n){
-					iterator tmp(*this);
-					return (tmp -= n);
-				}
-			} iterator;
-
-			typedef class const_iterator : public iterator {
-			public:
-				const_iterator() : iterator(){}
-				explicit const_iterator(point it) : iterator(it){}
-				explicit const_iterator(const iterator& rhs) : iterator(rhs){}
-				virtual ~const_iterator(){}
-				const T &operator*() const{
-					return *(this->_it_point);
-				}
-			}				const_iterator;
-
-			typedef class reverse_iterator : public iter{
-			public:
-				reverse_iterator() : iter(){}
-				explicit reverse_iterator(point it) : iter(it){}
-				reverse_iterator& operator=(const reverse_iterator& rhs) {
-					if (*this == rhs)
-						return *this;
-					this->_it_point = rhs._it_point;
-					return *this;
-				}
-				reverse_iterator(const reverse_iterator& rhs){
-					this->_it_point = rhs._it_point;
-				}
-				virtual ~reverse_iterator(){}
-				reverse_iterator& operator++() {
-					this->_it_point--;
-					return *this;
-				}
-				reverse_iterator& operator--() {
-					this->_it_point++;
-					return *this;
-				}
-				reverse_iterator operator++(int) {
-					reverse_iterator prev_it(*this);
-					this->_it_point--;
-					return prev_it;
-				}
-				reverse_iterator operator--(int) {
-					reverse_iterator prev_it(*this);
-					this->_it_point++;
-					return prev_it;
-				}
-				reverse_iterator &operator+=(int n){
-					this->_it_point += n;
-					return *this;
-				}
-				reverse_iterator operator+(int n){
-					reverse_iterator tmp(*this);
-					return tmp -= n;
-				}
-				reverse_iterator &operator-=(int n){
-					this->_it_point -= n;
-					return *this;
-				}
-				reverse_iterator operator-(int n){
-					reverse_iterator tmp(*this);
-					return tmp += n;
-				}
-			}				reverse_iterator;
-
-			typedef class const_reverse_iterator : public reverse_iterator {
-			public:
-				const_reverse_iterator() : reverse_iterator(){}
-				explicit const_reverse_iterator(point it) : reverse_iterator(it){}
-				explicit const_reverse_iterator(const reverse_iterator& rhs) : reverse_iterator(rhs){}
-				virtual ~const_reverse_iterator(){}
-				const T &operator*() const{
-					return *(this->_it_point);
-				}
-			}		const_reverse_iterator;
 
 			iterator begin(){
-				return (iterator(this->_data));
+				return (iterator(_data));
 			}
 			const_iterator begin() const{
-				return (const_iterator(this->_data));
+				return (const_iterator(_data));
 			}
 			iterator end(){
-				return (iterator(this->_data + _size));
+				return (iterator(_data + _size));
 			}
 			const_iterator end() const{
-				return (const_iterator(this->_data + _size));
+				return (const_iterator(_data + _size));
 			}
 			reverse_iterator rbegin(){
-				return (reverse_iterator(this->_data + (_size - 1)));
+				return (reverse_iterator(_data + (_size - 1)));
 			}
 			const_reverse_iterator rbegin() const{
-				return (const_reverse_iterator(this->_data + (_size - 1)));
+				return (const_reverse_iterator(_data + (_size - 1)));
 			}
 			reverse_iterator rend(){
-				return (reverse_iterator(this->_data - 1));
+				return (reverse_iterator(_data - 1));
 			}
 			const_reverse_iterator rend() const{
-				return (const_reverse_iterator(this->_data - 1));
+				return (const_reverse_iterator(_data - 1));
 			}
 
 					//		Capacity
@@ -307,18 +158,6 @@ namespace ft{
 				return false;
 			}
 
-		private:
-			void capacity_realloc(size_type n){
-				point tmp = this->_alloc.allocate(n);
-				for (size_type i = 0; i < _size; i++)
-					_alloc.construct(tmp + i, _data[i]);
-				size_type tmp_size = _size;
-				this->delete_vect();
-				_size = tmp_size;
-				_capacity = n;
-				_data = tmp;
-			}
-
 		public:
 			void reserve (size_type n){
 				if (n <= this->_capacity)
@@ -330,44 +169,44 @@ namespace ft{
 
 			//		Element access:
 
-			ref operator[] (size_type n){
+			reference operator[] (size_type n){
 				return _data[n];
 			}
 
-			const_ref operator[] (size_type n) const{
+			const_reference operator[] (size_type n) const{
 				return _data[n];
 			}
 
-			ref at (size_type n){
+			reference at (size_type n){
 				if (n >= _size)
 					throw std::out_of_range("vector");
 				return _data[n];
 			}
 
-			const_ref at (size_type n) const{
+			const_reference at (size_type n) const{
 				if (n >= _size)
 					throw std::out_of_range("vector");
 				return _data[n];
 			}
 
-			ref front(){
+			reference front(){
 				return _data[0];
 			}
 
-			const_ref front() const{
+			const_reference front() const{
 				return _data[0];
 			}
 
-			ref back(){
+			reference back(){
 				return _data[_size - 1];
 			}
 
-			const_ref back() const{
+			const_reference back() const{
 				return _data[_size - 1];
 			}
 
-			point data() {return (_size ? _data : nullptr);}
-			const_point data() const {return (_size ? _data : nullptr); }
+			pointer data() {return (_size ? _data : nullptr);}
+			const_pointer data() const {return (_size ? _data : nullptr); }
         //		Modifiers
 
 		template <class InputIterator>
@@ -387,7 +226,7 @@ namespace ft{
 		}
 
 		void assign (size_type n, const value_type& val){
-			_data = _alloc.allocate(20);
+			_data = _alloc.allocate(n);
 			this->clear();
 			if (n > _capacity){
 				_alloc.deallocate(_data, _capacity);
@@ -401,9 +240,7 @@ namespace ft{
 		void push_back (const value_type& val){
 			if (_size == _capacity)
 				reserve(_capacity ? _capacity * 2 : 1);
-				// this->capacity_realloc(_capacity == 0 ? 1 : _capacity * 2);
 			_alloc.construct(_data + _size++, val);
-			// _size++;
 		}
 
 		void pop_back(){
@@ -412,7 +249,7 @@ namespace ft{
 			}
 		}
 
-		iterator insert (iterator position, const value_type& val){
+		iterator insert (iterator position, const_reference val){
 			size_type len = 0;
 			iterator it_start = begin();
 			while (it_start++ != position) {
@@ -420,8 +257,8 @@ namespace ft{
 			}
 			if (!_capacity)
 				reserve(1);
-			if (_size + 1 > _capacity)
-				reserve(_size + 1 > _capacity * 2 ? _size + 1 : _capacity * 2);
+			if (_size == _capacity)
+				reserve(_capacity * 2);
 			for (size_type i = _size; i > len; --i){
 				_alloc.destroy(_data + i);
 				_alloc.construct(_data + i, _data[i - 1]);
@@ -432,7 +269,7 @@ namespace ft{
 			return iterator(_data + len);
 		}
 
-		void insert (iterator position, size_type n, const value_type& val){
+		void insert (iterator position, size_type n, const_reference val){
 			if (n == 0)
 				return ;
 			if (position == end()) {
@@ -474,7 +311,7 @@ namespace ft{
 				n++;
 			if (_size + n > _capacity){
 				size_type new_capacity = _size + n > _capacity * 2 ? _size + n : _capacity * 2;
-				point newArr = _alloc.allocate(new_capacity);
+				pointer newArr = _alloc.allocate(new_capacity);
 				for (size_type i = 0; i < len; i++)
 					_alloc.construct(newArr + i, _data[i]);
 				try{
@@ -564,16 +401,6 @@ namespace ft{
 			_size = 0;
 		}
 
-		private:
-			void delete_vect(){
-				if (this->_size != 0){
-					for (size_type i = 0; i < _size; i++)
-						_alloc.destroy(_data + i);
-					_alloc.deallocate(_data, _capacity);
-					_capacity = 0;
-					_size = 0;
-				}
-			}
 
 		public:
 			allocator_type get_allocator() const{

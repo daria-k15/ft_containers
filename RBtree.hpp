@@ -1,9 +1,8 @@
-#ifndef RBTREE_HPP
-#define RBTREE_HPP
+#ifndef rbtree_HPP
+#define rbtree_HPP
 
 #include <memory>
 #include <functional>
-#include <iostream>
 #include <limits>
 #include "Iter.hpp"
 #include "ReverseIter.hpp"
@@ -27,7 +26,7 @@ namespace ft{
 			typedef class ft::TreeIterator<Value> 												iterator;
 			typedef const class ft::TreeIterator<Value> 										const_iterator;
 			typedef class ft::ReverseIterator<iterator> 										reverse_iterator;
-			typedef class ft::ReverseIterator<const_iterator> 							const_reverse_iterator;
+			typedef class ft::ReverseIterator<const_iterator> 									const_reverse_iterator;
 
 		private:
 			allocator_type		_alloc;
@@ -106,7 +105,7 @@ namespace ft{
 				if (!isNil(tmp->left))
 					tmp->left->parent = node;
 				tmp->parent = node->parent;
-				if (node->parent == NULL)
+				if (!node->parent)
 					_root = tmp;
 				else if (node == node->parent->right)
 					node->parent->right = tmp;
@@ -140,7 +139,6 @@ namespace ft{
 
 			void insertFixUp(node_pointer node){
 				if (node != _root && node->parent != _root){
-					// node_pointer gparent = node->parent->parent;
 					while (node != _root && !node->parent->is_black){
 						if (node->parent == node->parent->parent->left){
 							node_pointer uncle = node->parent->parent->right;
@@ -282,7 +280,6 @@ namespace ft{
 			void _relocate(node_pointer where, node_pointer node){
 				if (where == _root)
 					_root = node;
-				// std::cout << where->parent->left;
 				else if (where == where->parent->left)
 					where->parent->left = node;
 				else
@@ -315,36 +312,34 @@ namespace ft{
 				 insert(first, last);
 			 }
 
-			rbtree(rbtree const &x) : _alloc(x._alloc), _node_alloc(x._node_alloc), _compare(x._compare), _root(x._root), _head(x._head), _nil(x._nil), _size(x._size){
+			rbtree(rbtree const &x) : _alloc(x._alloc), _node_alloc(x._node_alloc), _compare(x._compare){
 				*this = x;
 			}
 
 			rbtree&operator=(rbtree const &x){
 				if (this != &x){
-					this->_node_alloc = x._node_alloc;
-					this->_alloc = x._alloc;
-					this->_compare = x._compare;
-					if (this->_root == NULL)
-						init_head();
-					else
-						clearTree(_root);
-					if (x._size == 0)
-						this->_root = this->_head;
-					else{
-						this->_root = copyNode(x._root);
-						copyChild(this->_root, x._root);
-					}
-					this->_size = x._size;
+					_root ? clearTree(_root) : init_head();
+					if (x._size){
+						_root = _node_alloc.allocate(1);
+						_node_alloc.construct(_root, Node<value_type>());
+						_root->is_black = x._root->is_black;
+						_root->is_nil = x._root->is_nil;
+						if (x._root->value){
+							_root->value = _alloc.allocate(1);
+							_alloc.construct(_root->value, *x._root->value);
+						}
+						copyChild(_root, x._root);
+					} else
+						_root = _head;
+					_size = x._size;
 				}
 				return *this;
 			}
 
 			~rbtree(){
-				// clearNode(_root);
-				// _alloc.destroy(_head->value);
-				// _alloc.deallocate(_head->value, 1);
-				// _node_alloc.deallocate(_head, 1);
-				// _node_alloc.deallocate(_nil, 1);
+				clearTree(_root);
+				clearNode(_head);
+				_node_alloc.deallocate(_nil, 1);
 			}
 
 
@@ -365,80 +360,53 @@ namespace ft{
 			size_type max_size() const {return std::numeric_limits<size_type>::max() / sizeof(size_type);}
 	
 			void clear(){
-				clearNode(_root);
+				clearTree(_root);
 				_size = 0;
 				_root = _head;
 				_head->parent = NULL;
 			}
 
-			pair<iterator, bool> insert(const_reference val){
+			ft::pair<iterator, bool> insert(const_reference val) {
 				iterator it = find(val);
 				if (it != end())
 					return ft::pair<iterator, bool>(it, false);
-				node_pointer node = _node_alloc.allocate(1);
-				pointer data = _alloc.allocate(1);
-				_alloc.construct(data, val);
-				_node_alloc.construct(node, Node<value_type>(data));
-				node->left = node->right = _nil;
-				insert_to_tree(node, _root);
-				ft::pair<iterator, bool> res(iterator(node), true);
-				insertFixUp(node);
-				node = tree_max(_root);
-				node->right = _head;
-				_head->parent = node;
-				_size++;
+				node_pointer noda = _node_alloc.allocate(1);
+				pointer dataVal = _alloc.allocate(1);
+				_alloc.construct(dataVal, val);
+				_node_alloc.construct(noda, Node<value_type>(dataVal));
+			 	noda->left = noda->right = _nil;
+				insert_to_tree(noda, _root);
+				ft::pair<iterator, bool> res(iterator(noda), true);
+				insertFixUp(noda);
+				node_pointer max_noda = tree_max(_root);
+				max_noda->right = _head;
+				_head->parent = max_noda;
+				++_size;
 				return res;
 			}
 
-			iterator insert(iterator pos, const_reference value){
+			iterator insert(iterator pos, const_reference value) {
 				iterator it = find(value);
 				if (it != end())
-					return (end());
-				node_pointer node = _node_alloc.allocate(1);
-				pointer data = _alloc.allocate(1);
-				_alloc.construct(data, value);
-				_node_alloc.construct(node, Node<value_type>(data));
-				node->left = node->right = _nil;
-				if (pos == end()){
+					return end();
+				node_pointer noda = _node_alloc.allocate(1);
+				pointer dataVal = _alloc.allocate(1);
+				_alloc.construct(dataVal, value);
+				_node_alloc.construct(noda, Node<value_type>(dataVal));
+			 	noda->left = noda->right = _nil;
+				if (pos == end()) {
 					--pos;
-					insert_to_tree(node, end() == begin() || _compare(value, *pos) ? _root : _head->parent);
-				} else if (pos == begin()){
-					insert_to_tree(node, end() == begin() || _compare(*pos, value) ? _root : tree_min(_root));
-				} else{
-					insert_to_tree(node, _root);
-				}
-				insertFixUp(node);
-				node_pointer maxV = tree_max(_root);
-				maxV->right = _head;
-				_head->parent = maxV;
+					insertPrivate(noda, end() == begin() || comp(value, *pos) ? _root : _head->parent);
+				} else if (pos == begin())
+					insertPrivate(noda, end() == begin() || comp(*pos, value) ? _root : minimum(_root));
+				else 
+					insertPrivate(noda, _root);
+				normalizeInsert(noda);
+				node_pointer max_noda = tree_max(_root);
+				max_noda->right = _head;
+				_head->parent = max_noda;
 				++_size;
-				return (iterator(node));
-				// iterator it = find(value);
-				// if (it != end())
-				// 	return end();
-				// node_pointer res = _node_alloc.allocate(1);
-				// pointer data = _alloc.allocate(1);
-				// _alloc.construct(data, value);
-				// _node_alloc.construct(res, Node<value_type>(data));
-				// res->left = res->right = _nil;
-				// if (pos == begin()){
-				// 	if (pos != end() && _compare(value, *pos))
-				// 		insert_to_tree(res, tree_min(_root));
-				// 	else
-				// 		insert_to_tree(res, _root);
-				// } else if(pos == end()){
-				// 	if (pos != begin() && _compare(*(--pos), value))
-				// 		insert_to_tree(res, _head->parent);
-				// 	else
-				// 		insert_to_tree(res, _root);
-				// } else 
-				// 	insert_to_tree(res, _root);
-				// insertFixUp(res);
-				// ++_size;
-				// node_pointer max_v = tree_max(_root);
-				// max_v->right = _head;
-				// _head->parent = max_v;
-				// return iterator(res);
+				return iterator(noda);
 			}
 
 			template<class InputIt>
@@ -515,8 +483,6 @@ namespace ft{
 				std::swap(_size, other._size);
 			}
 
-			// size_type count(const value_type& value) const{return(find(value) != end());}
-
 			iterator find(const_reference value){
 				if (!_root || isNil(_root))
 					return end();
@@ -566,12 +532,7 @@ namespace ft{
 			ft::pair<iterator, iterator> equal_range(const value_type &val){
 				return ft::make_pair(lower_bound(val), upper_bound(val));
 			}
-
-			
-
-
 	};
-
 };
 
 namespace std{
@@ -582,3 +543,4 @@ namespace std{
 }
 
 #endif
+

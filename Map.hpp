@@ -45,19 +45,19 @@ namespace ft{
 
 		public:
             explicit map (const key_compare& comp = key_compare(), const allocator_type& alloc = allocator_type()) : 
-				_alloc(alloc), _compare(comp), _rbtree(tree(comp, alloc)){}
+				_alloc(alloc), _compare(comp), _rbtree(tree(comp, _alloc)){}
 
 			template <class InputIt>
 			map(InputIt first, InputIt last, const key_compare& comp = key_compare(),
 				const allocator_type& alloc = allocator_type(), typename enable_if<!std::numeric_limits<InputIt>::is_specialized>::type * = 0):
-				 _compare(comp),_alloc(alloc), _rbtree(first, last, comp, alloc){}
+				 _compare(comp),_alloc(alloc), _rbtree(first, last, comp, _alloc){}
 
 			map(map const &x): _compare(x._compare), _alloc(x._alloc), _rbtree(x._rbtree){*this = x;}
 
 			map & operator=(const map &x){
 				if (this != &x){
-					_alloc = x._alloc;
-					_compare = x._compare;
+					// _alloc = x._alloc;
+					// _compare = x._compare;
 					_rbtree = x._rbtree;
 				}
 				return *this;
@@ -168,7 +168,7 @@ namespace ft{
 			}
 			pair<iterator, iterator> equal_range(const key_type& key){return _rbtree.equal_range(ft::make_pair(key, mapped_type()));}
 			pair<const_iterator, const_iterator> equal_range(const key_type& key) const{return _rbtree.equal_range(ft::make_pair(key, mapped_type()));}
-			allocator_type get_allocator() const{return _alloc;}
+			allocator_type get_allocator() const{ return _rbtree.get_allocator(); }
     };
 
 	template <class Key, class T, class Compare, class Allocator>
