@@ -24,7 +24,7 @@ namespace ft{
 	};
 
 	template<class T> struct is_integral : public ft::integral_const<T, false>{};
-	template <> struct is_integral<bool> : public ft::integral_const<bool, false>{};
+	template <> struct is_integral<bool> : public ft::integral_const<bool, true>{};
 	template <> struct is_integral<char> : public ft::integral_const<bool, true> {};
 	template <> struct is_integral<signed char>	: public ft::integral_const<bool, true> {};
 	template <> struct is_integral<unsigned char> : public ft::integral_const<bool, true> {};
@@ -79,7 +79,7 @@ namespace ft{
 	template <class Iterator>
 	class iterator_traits{
 		public:
-			typedef typename Iterator::diff_t				diff_t;
+			typedef typename Iterator::difference_type		difference_type;
 			typedef typename Iterator::value_type			value_type;
 			typedef typename Iterator::pointer				pointer;
 			typedef typename Iterator::reference			reference;
@@ -89,7 +89,7 @@ namespace ft{
 	template <class T>
 	class iterator_traits<T*>{
 		public:		
-			typedef std::ptrdiff_t						diff_t;
+			typedef std::ptrdiff_t						difference_type;
 			typedef T									value_type;
 			typedef T*									pointer;
 			typedef T&									reference;
@@ -99,7 +99,7 @@ namespace ft{
 	template <class T>
 	class iterator_traits<const T*>{
 		public:		
-			typedef std::ptrdiff_t						diff_t;
+			typedef std::ptrdiff_t						difference_type;
 			typedef const T								value_type;
 			typedef const T*							pointer;
 			typedef const T&							reference;

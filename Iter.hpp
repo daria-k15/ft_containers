@@ -13,7 +13,7 @@ namespace ft{
 			typedef typename ft::iterator_traits<Value *>::reference			reference;
             typedef const typename ft::iterator_traits<Value *>::reference		const_reference;
             typedef const typename ft::iterator_traits<Value *>::pointer    	const_pointer;
-            typedef typename ft::iterator_traits<Value *>::diff_t      			diff_t;
+            typedef typename ft::iterator_traits<Value *>::difference_type      difference_type;
             typedef std::size_t                             				    size_type;
 			typedef  Node<typename remove_const<Value>::type>*				node_pointer;
 		protected:

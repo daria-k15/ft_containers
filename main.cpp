@@ -1,133 +1,116 @@
-#include "Stack.hpp"
-#include "Vector.hpp"
-#include "Map.hpp"
-#include "test.hpp"
-#include <stack>
-#include <vector>
-#include <map>
-#include <vector>
-#include <unistd.h>
-#define _ratio 10000
+#include <iostream>
+#include <string>
+#include <deque>
+#if 1 //CREATE A REAL STL EXAMPLE
+	#include <map>
+	#include <stack>
+	#include <vector>
+	namespace ft = std;
+#else
+	#include <Map.hpp>
+	#include <Stack.hpp>
+	#include <Vector.hpp>
+#endif
 
-const std::string GREEN = "\x1B[1;32m";
-const std::string REDD = "\x1B[1;31m";
-const std::string YELLOW = "\x1B[1;33m";
-const std::string WHITE = "\x1B[1;39m";
-const std::string RESET = "\033[0m";
+#include <stdlib.h>
+
+#define MAX_RAM 4294967296
+#define BUFFER_SIZE 4096
+struct Buffer
+{
+	int idx;
+	char buff[BUFFER_SIZE];
+};
 
 
+#define COUNT (MAX_RAM / (int)sizeof(Buffer))
 
-std::string exec(const char* cmd) {
-	char buffer[128];
-	std::string result = "";
-	FILE* pipe = popen(cmd, "r");
-	if (!pipe) throw std::runtime_error("popen() failed!");
-	try {
-		while (fgets(buffer, sizeof buffer, pipe) != NULL) {
-			result += buffer;
+template<typename T>
+class MutantStack : public ft::stack<T>
+{
+public:
+	MutantStack() {}
+	MutantStack(const MutantStack<T>& src) { *this = src; }
+	MutantStack<T>& operator=(const MutantStack<T>& rhs) 
+	{
+		this->c = rhs.c;
+		return *this;
+	}
+	~MutantStack() {}
+
+	typedef typename ft::stack<T>::container_type::iterator iterator;
+
+	iterator begin() { return this->c.begin(); }
+	iterator end() { return this->c.end(); }
+};
+
+int main(int argc, char** argv) {
+	if (argc != 2)
+	{
+		std::cerr << "Usage: ./test seed" << std::endl;
+		std::cerr << "Provide a seed please" << std::endl;
+		std::cerr << "Count value:" << COUNT << std::endl;
+		return 1;
+	}
+	const int seed = atoi(argv[1]);
+	srand(seed);
+
+	ft::vector<std::string> vector_str;
+	ft::vector<int> vector_int;
+	ft::stack<int> stack_int;
+	ft::vector<Buffer> vector_buffer;
+	ft::stack<Buffer, std::deque<Buffer> > stack_deq_buffer;
+	ft::map<int, int> map_int;
+
+	for (int i = 0; i < COUNT; i++)
+	{
+		vector_buffer.push_back(Buffer());
+	}
+
+	for (int i = 0; i < COUNT; i++)
+	{
+		const int idx = rand() % COUNT;
+		vector_buffer[idx].idx = 5;
+	}
+	ft::vector<Buffer>().swap(vector_buffer);
+
+	try
+	{
+		for (int i = 0; i < COUNT; i++)
+		{
+			const int idx = rand() % COUNT;
+			vector_buffer.at(idx);
+			std::cerr << "Error: THIS VECTOR SHOULD BE EMPTY!!" <<std::endl;
 		}
-	} catch (...) { pclose(pipe); throw; }
-	pclose(pipe);
-	return result;
-}
-
-std::string get_leak_string(std::string s) {
-	std::string tmp;
-	int idx = s.find("total leaked bytes");
-	for (; s[idx] != '\n' ; --idx) {}
-	int edx = idx + 1;
-	for (; s[edx] != '\n' ; ++edx) {}
-
-	return s.substr(++idx, edx - 101);
-}
-
-int leaks_test(pid_t pid) {
-	std::string a = "leaks ";
-	a += std::to_string(static_cast<int>(pid));
-	usleep(50);
-	std::string s = get_leak_string(exec(a.c_str()));
-
-	if (s.find("0 leaks for 0 total leaked bytes") != std::string::npos) {
-		std::cout << "CLEAR" << std::endl;
-		return (0);
 	}
-	else {
-	    std::cout << "LEAKS" << std::endl;
-	    return (1);
+	catch(const std::exception& e)
+	{
+		//NORMAL ! :P
 	}
-}
-
-template <class T, class V>
-int run_map_unit_test(std::string test_name, std::vector<int> (func1)(std::map<T, V>), std::vector<int> (func2)(ft::map<T, V>)) {
-    int    result;
-    int    leaks;
-	time_t t1;
-	time_t t2;
-	std::vector<int > res1;
-	std::vector<int > res2;
-	std::map<int, int> map;
-	ft::map<int, int> my_map;
-
-	// printElement(test_name);
-	res1 = func1(map);
-	res2 = func2(my_map);
-	if (res1 == res2) {
-        std::cout << "OK" << std::endl;
-	    result = 0;
+	
+	for (int i = 0; i < COUNT; ++i)
+	{
+		map_int.insert(ft::make_pair(rand(), rand()));
 	}
-	else {
-        std::cout << "KO" << std::endl;
-	    result = 1;
+
+	int sum = 0;
+	for (int i = 0; i < 10000; i++)
+	{
+		int access = rand();
+		sum += map_int[access];
 	}
-	// t1 = g_end1 - g_start1, t2 = g_end2 - g_start2;
-	// (t1 >= t2) ? printElement(GREEN + std::to_string(t2) + "ms" + RESET) : printElement(REDD + std::to_string(t2) + "ms" + RESET);
-	// (t1 > t2) ? printElement(REDD + std::to_string(t1) + "ms" + RESET) : printElement(GREEN + std::to_string(t1) + "ms" + RESET);
-	leaks = leaks_test(getpid());
-	// cout << endl;
+	std::cout << "should be constant with the same seed: " << sum << std::endl;
 
-	return !(!result && !leaks);
-}
-
-template <class T, class V>
-std::vector<int> assign_overload_test(std::map<T, V> mp) {
-    std::vector<int> v;
-    for (int i = 0, j = 10; i < 20 * _ratio; ++i, ++j)
-        mp.insert(std::make_pair(i, j));
-    std::map<T, V> mp2;
-    for (int i = 20 * _ratio, j = 200010; i < 40 * _ratio; ++i, ++j)
-        mp2.insert(std::make_pair(i, j));
-    // g_start1 = timer();
-    mp2 = mp;
-    // g_end1 = timer();
-    typename std::map<T, V>::iterator it = mp2.begin();
-    for (; it != mp2.end(); it++) {
-        v.push_back(it->first);
-        v.push_back(it->second);
-    }
-    v.push_back(mp2.size());
-    return v;
-}
-
-template <class T, class V>
-std::vector<int> assign_overload_test(ft::map<T, V> mp) {
-    std::vector<int> v;
-    for (int i = 0, j = 10; i < 20 * _ratio; ++i, ++j)
-        mp.insert(ft::make_pair(i, j));
-    ft::map<T, V> mp2;
-    for (int i = 20 * _ratio, j = 200010; i < 40 * _ratio; ++i, ++j)
-        mp2.insert(ft::make_pair(i, j));
-    // g_start2 = timer();
-    mp2 = mp;
-    // g_end2 = timer();
-    typename ft::map<T, V>::iterator it = mp2.begin();
-    for (; it != mp2.end(); it++) {
-        v.push_back(it->first);
-        v.push_back(it->second);
-    }
-    v.push_back(mp2.size());
-    return v;
-}
-
-int main() {
-    exit(run_map_unit_test<int, int>("assign overload", assign_overload_test, assign_overload_test));
+	{
+		ft::map<int, int> copy = map_int;
+	}
+	MutantStack<char> iterable_stack;
+	for (char letter = 'a'; letter <= 'z'; letter++)
+		iterable_stack.push(letter);
+	for (MutantStack<char>::iterator it = iterable_stack.begin(); it != iterable_stack.end(); it++)
+	{
+		std::cout << *it;
+	}
+	std::cout << std::endl;
+	return (0);
 }
